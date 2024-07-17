@@ -1,0 +1,89 @@
+
+@font-face {
+    font-family:MoreSugar ;
+    src: url(MoreSugar-Regular.ttf);
+    
+  }
+  @font-face {
+    font-family: Canda;
+    src: url(canda.ttf);
+  }
+  body::-webkit-scrollbar {
+    display: none;
+  }
+  @media(max-width:961px){
+
+    body{
+        background-color: #FFF1F1;
+        padding-bottom: 5rem;
+    }
+    .navbar {
+        overflow: hidden;
+        display: flex;
+        background-color: #602147;
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        height:60px;
+        align-items: center;
+        justify-content:space-between;
+        font-family:MoreSugar;
+        }
+  
+        .navbar a {
+        float: left;
+        display: block;
+        color: #FFE7E7;
+        text-align: center;
+        padding: 0px 16px;
+        text-decoration: none;
+        font-size: 15px;
+        }
+  
+        .navbar a:hover {
+        color: #FFD700;
+        }
+  
+        .navbar a.active {
+        color: #FFD700;
+        } 
+        .dashboard{
+            font-family: MoreSugar;
+            text-transform: uppercase;
+            font-size: 35px;
+            margin-top: 25px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+      
+          }
+          .salon_name{
+            font-family: canda;
+            font-size: 30px;
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+          }
+          .logout{
+            font-family: canda;
+            font-size: 30px;
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+          }
+          #all{
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            justify-content: space-between;
+
+
+          }
+  
+      }
+      
+    
+  

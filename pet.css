@@ -1,0 +1,375 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300&display=swap');
+
+
+/* header */
+  @font-face {
+        font-family:MoreSugar ;
+        src: url(MoreSugar-Regular.ttf);
+    }
+@font-face {
+        font-family:Canda ;
+        src: url(Canda\ Tawa\ Regular.ttf);
+    }
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            background-color: #FFF1F1;
+            overflow: hidden;
+}
+body::-webkit-scrollbar {
+            display: none;
+        }
+        ul {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+        a {
+            text-decoration: none;
+        }
+        .logo {
+            margin: 0;
+            font-size: 1.45rem;
+            vertical-align: middle; /* Align the logo vertically */
+        }
+            .main-nav {
+        display: flex;
+        justify-content: flex-end; /* Align menu items to the right */
+        align-items: center; /* Center vertically */
+        font-family:MoreSugar;
+    }
+
+    .main-nav a {
+        padding: 10px 15px;
+        text-transform: uppercase;
+        text-align: center;
+        display: block;
+        color: #FFE7E7;
+        font-size: 0.99rem;
+        text-decoration: none;
+    }
+    .main-nav a:hover {
+        color: #CAA6A6;
+    }
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.01em 1rem;
+        background-color: #602147;
+        border-radius: 5px;
+        box-shadow: 0px 0px 14px 0px rgba(0,0,0,0.75);
+        height: 70px;
+    }
+    .logo{
+        height: 40px;
+    }
+
+
+
+        .circle-icon {
+            background-color: #BFBDBC;
+            color: white;
+            border-radius: 50%;
+            padding: 10px;
+            font-size: 20px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .dropdown {
+        position: relative;
+        display: inline-block;
+        }
+        .dropdown-content {
+        display: none;
+        position: absolute;
+        background-color: #FFD700;
+        min-width: 160px;
+        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+        right: 20px;
+        font-family: 'More Sugar', cursive;
+        border-radius: 5px;
+        }
+        .dropdown-content a {
+        color: black;
+        padding: 12px 16px;
+        text-decoration: none;
+        display: block;
+        }
+        .dropdown-content a:hover {
+        background-color: #602147;
+        color: #FBF8DD;
+        }
+        .dropdown:hover .dropdown-content {
+        display: block;
+        }
+
+h1{
+font-size: 30px;
+color: #491133;
+text-decoration: none;
+}
+
+
+
+/* Responsive header */
+@media  (min-width: 992px){
+    .header{visibility:block;}
+    .navbar{
+        visibility: hidden;
+        display: none;
+    }
+    .navtop{
+visibility: hidden;
+display: none;
+    }
+    .book_button a button {
+        background-color: #FFD700;
+        color: #602147;
+        border-radius: 3px;
+        border: none;
+        height: 30px;
+        font-family: MoreSugar;
+        cursor: pointer;
+        transition: background-color 0.3s, transform 0.1s;
+    }
+    book_button a button:hover {
+        background-color: rgb(255, 166, 2);
+    }
+    
+    .book_button a button:active {
+        background-color: #ffea00;
+        transform: scale(0.95);
+    }
+    
+    
+    
+}
+
+
+@media  (max-width: 991px)
+{
+    .navbar {
+        overflow: hidden;
+        display: flex;
+        background-color: #602147;
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        height:60px;
+        align-items: center;
+        justify-content:space-between;
+        font-family:MoreSugar;
+        }
+    
+        .navbar a {
+        float: left;
+        display: block;
+        color: #FFE7E7;
+        text-align: center;
+        padding: 0px 16px;
+        text-decoration: none;
+        font-size: 17px;
+        }
+    
+        .navbar a:hover {
+        color: #FFD700;
+        }
+    
+        .navbar a.active {
+        color: #FFD700;
+        }
+      .header {
+        display: none;
+        visibility: hidden;
+      }
+      .navtop{
+        display: flex;
+        background-color: #602147;
+        position: fixed;
+        top: 0;
+        width: 100%;
+        height:60px;
+        z-index:10;
+        justify-content: center;
+        align-items: center;
+
+}
+.logo_nav_top{
+    height: 80%;
+}
+
+.add-photo-button {
+    background-color: #602147; /* Purple background */
+    color: white; /* White text color */
+    border: none; /* Remove border */
+    padding: 1px; /* Padding inside the button */
+    border-radius: 50%; /* Make button circular */
+    cursor: pointer; /* Show cursor as pointer */
+    width: 80px; /* Set width equal to height for a perfect circle */
+    height: 80px; /* Set height equal to width for a perfect circle */
+    display: flex; /* Use flexbox for alignment */
+    align-items: center; /* Center horizontally */
+    justify-content: center; /* Center vertically */
+    position: absolute; /* Position the button absolutely */
+    left: 12%; /* Position on the left */
+    top: 50%; /* Center vertically */
+    transform: translateY(-50%); /* Adjust for exact vertical centering */
+}
+
+
+.add-photo-button i {
+    font-size: 40px; /* Adjust icon size */
+}
+
+.add-photo-button:hover {
+    background-color: #491133; /* Darker purple background on hover */
+}
+
+.add-photo-button1 {
+ background-color: #602147; /* Purple background */
+    color: white; /* White text color */
+    border: none; /* Remove border */
+    padding: 1px; /* Padding inside the button */
+    border-radius: 50%; /* Make button circular */
+    cursor: pointer; /* Show cursor as pointer */
+    width: 80px; /* Set width equal to height for a perfect circle */
+    height: 80px; /* Set height equal to width for a perfect circle */
+    display: flex; /* Use flexbox for alignment */
+    align-items: center; /* Center horizontally */
+    justify-content: center; /* Center vertically */
+    position: absolute; /* Position the button absolutely */
+    left: 12%; /* Position on the left */
+    top: 50%; /* Center vertically */
+    transform: translateY(-50%); /* Adjust for exact vertical centering */
+
+}
+
+.add-photo-button1 i {
+    font-size: 40px; /* Adjust icon size */
+}
+
+.add-photo-button1:hover {
+    background-color: #491133; /* Darker purple background on hover */
+}
+
+
+}
+
+
+.Pet-header {
+    font-family: MoreSugar;
+    font-size: 40px;
+    color: #602147;
+    text-align: center; /* Center the text horizontally */
+    align-self: center; /* Align the item itself vertically (if using Flexbox or Grid) */
+    justify-content: center; /* Align content (if using Flexbox) */
+    margin-top: 70px;
+}
+
+.pet-button  {
+    background-color: #FFD700; 
+    color: #602147; 
+    font-family: MoreSugar;
+    font-size: 20px; 
+    text-align: center; 
+    width: 80%; 
+    padding: 15px 0; 
+    display: block;
+    margin: 0 auto; 
+    box-sizing: border-box; 
+    border: none; 
+    cursor: pointer; 
+    text-decoration: none; 
+    border-radius: 5px;
+}
+
+.pet-button:hover {
+   text-decoration: none;
+}
+.pet-button:active {
+    transform: scale(0.9);
+}
+
+
+/* Box-pet */
+
+.curved-box {
+    background-color: #FFE7E7; /* Light pink background */
+    color: black; /* Black text color */
+    border: 2px solid #BFBDBC; /* Light gray border */
+    border-radius: 15px; /* Rounded corners */
+    text-align: center; /* Center the text inside the box */
+    height: 120px;
+    width: 80%;
+    margin: 20px auto; /* Center horizontally and add space above */
+    padding: 20px; /* Add padding inside the box */
+    box-sizing: border-box; /* Include padding and border in total width/height */
+}
+
+.box-content{
+font-family: MoreSugar;
+text-align: center;
+font-size: 40px;
+color: #602147;
+}
+
+.add-photo-button {
+    background-color: #602147; /* Purple background */
+    color: white; /* White text color */
+    border: none; /* Remove border */
+    padding: 1px; /* Padding inside the button */
+    border-radius: 50%; /* Make button circular */
+    cursor: pointer; /* Show cursor as pointer */
+    width: 80px; /* Set width equal to height for a perfect circle */
+    height: 80px; /* Set height equal to width for a perfect circle */
+    display: flex; /* Use flexbox for alignment */
+    align-items: center; /* Center horizontally */
+    justify-content: center; /* Center vertically */
+    position: absolute; /* Position the button absolutely */
+    left: 12%; /* Center horizontally */
+    top: 42.5%;
+
+}
+
+.add-photo-button i {
+    font-size: 40px; /* Adjust icon size */
+}
+
+.add-photo-button:hover {
+    background-color: #491133; /* Darker purple background on hover */
+}
+
+.add-photo-button1 {
+    background-color: #602147; /* Purple background */
+    color: white; /* White text color */
+    border: none; /* Remove border */
+    padding: 1px; /* Padding inside the button */
+    border-radius: 50%; /* Make button circular */
+    cursor: pointer; /* Show cursor as pointer */
+    width: 80px; /* Set width equal to height for a perfect circle */
+    height: 80px; /* Set height equal to width for a perfect circle */
+    display: flex; /* Use flexbox for alignment */
+    align-items: center; /* Center horizontally */
+    justify-content: center; /* Center vertically */
+    position: absolute; /* Position the button absolutely */
+    top: 62.5%;
+    left: 12%;
+
+}
+
+.add-photo-button1 i {
+    font-size: 40px; /* Adjust icon size */
+}
+
+.add-photo-button1:hover {
+    background-color: #491133; /* Darker purple background on hover */
+}
+
+
+
