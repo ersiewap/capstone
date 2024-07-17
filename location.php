@@ -2,9 +2,10 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
+<link rel="icon" type="image/x-icon" href="favicon.ico">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <link rel="stylesheet" href="location.css">
+<title>MIPS</title>
 
 </head>
 
@@ -101,8 +102,6 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin']!== true) {
                     <option value="">Sunday 8am-5pm</option>
                 </select>
                 </div>
-                    <a href="book.php?salon=1" id="fbutton" class="button" style="background-color: #602147; 
-                    color: #FFD700; font-family: MoreSugar;">Book Now</a>
                 </div>
             </div>
             <div class="salon-map">
@@ -137,8 +136,6 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin']!== true) {
                     <option value="">9am-7pm Daily</option>
                 </select>
                 </div>
-                <a href="book.php?salon=2" id="fbutton" class="button" style="background-color: #602147; 
-                    color: #FFD700; font-family: MoreSugar;">Book Now</a>
                 </div>
             </div>
         </section>
@@ -169,8 +166,6 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin']!== true) {
                     <option value="">Working Hours</option>
                     <option value="">Daily 8am-5pm</option>
                 </select>
-                <a href="book.php?salon=3" id="fbutton" class="button" style="background-color: #602147; 
-                    color: #FFD700; font-family: MoreSugar;">Book Now</a>
                 </div>
             </div>
             <div class="salon-map">

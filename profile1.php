@@ -10,12 +10,91 @@
 
 <?php
 session_start();
-if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin']!== true) {
-    
-    echo "<script>alert('You need to log in to view this page.');</script>";
-    header('refresh:2; url=sample.php');
+if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
+    header("Location: login.php"); // Redirect to login page if not logged in
     exit;
 }
+
+$servername = "localhost";
+$username = "root";
+$password = "";
+$dbname = "capstone";
+
+// Create connection
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+$ownerID = $_SESSION['ownerID'];
+
+$sql = "SELECT b.bookid, p.petname, b.serviceid, b.date, b.time, b.paymentmethod, s.shopname
+        FROM book b
+        JOIN petinfo p ON b.petid = p.petid
+        JOIN salon s ON b.salonid = s.salonid
+        WHERE b.ownerID = ?";
+
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $ownerID);
+$stmt->execute();
+$result = $stmt->get_result();
+
+$bookings = [];
+while ($row = $result->fetch_assoc()) {
+    // Split the service IDs and fetch service names
+    $serviceIds = explode(',', $row['serviceid']);
+    $serviceNames = [];
+    foreach ($serviceIds as $serviceId) {
+      $serviceId = intval($serviceId);
+      $serviceResult = $conn->query("SELECT servicename  FROM services WHERE serviceid = $serviceId");
+      if ($serviceRow = $serviceResult->fetch_assoc()) {
+          $serviceNames[] = $serviceRow['servicename'];
+      }
+  }
+
+  $row['servicenames'] = implode(', ', $serviceNames); // Convert array to comma-separated string
+  $row['petname'] = $row['petname']; // Add petname key to the row array
+  $bookings[] = $row;
+}
+
+$data = array();
+
+if (isset($_POST['petname']) && !empty($_POST['petname'])) {
+  $data['petname'] = $_POST['petname'];
+}
+
+if (isset($_POST['petsalon']) && !empty($_POST['petsalon'])) {
+  $data['petsalon'] = $_POST['petsalon'];
+}
+
+if (isset($_POST['date']) && !empty($_POST['date'])) {
+  $data['date'] = $_POST['date'];
+}
+
+if (isset($_POST['time']) && !empty($_POST['time'])) {
+  $data['time'] = $_POST['time'];
+}
+
+if (isset($_POST['paymentmethod']) && !empty($_POST['paymentmethod'])) {
+  $data['paymentmethod'] = $_POST['paymentmethod'];
+}
+
+if (isset($_POST['services']) && is_array($_POST['services'])) {
+  $data['servicenames'] = implode(', ', $_POST['services']);
+}
+
+echo json_encode($data);
+
+  
+$stmt->close();
+$conn->close();
+
+echo '<script>';
+echo 'console.log(' . json_encode($bookings) . ');'; // Logging $bookings to console
+echo '</script>';
+
 ?>
 
 <body>
@@ -66,98 +145,92 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin']!== true) {
     </div>
     <hr class="line1"></hr>
 
-<!-- Bookings -->
+    <!-- Bookings -->
     <ul class="accordion-menu">
         <li>
-          <div class="dropdownlink"><i class="fa-regular fa-calendar-days"></i></i> Bookings
-            <i class="fa fa-chevron-down" aria-hidden="true"></i>
-          </div>
-          <ul class="submenuItems"> 
-            <li><a href="#">You do not have active bookings</a></li>
-            
-                <div class="profile-box">
-                	<div class="code" hidden></div>
-                    <div class="profile-name"></div>
-                    <div class="profile-name"></div>
-                    <button class="View_button" onclick="showPopup()">View</button>
-                </div>
-          </ul>
+            <div class="dropdownlink"><i class="fa-regular fa-calendar-days"></i> Bookings <i class="fa fa-chevron-down" aria-hidden="true"></i></div>
+            <ul class="submenuItems">
+                <?php if (empty($bookings)) : ?>
+                    <li><a href="#">You do not have active bookings</a></li>
+                <?php else : ?>
+                    <?php foreach ($bookings as $booking) : ?>
+                        <li>
+                            <div class="profile-box">
+                                <div class="profile-name"><?php echo htmlspecialchars($booking['petname']); ?></div>
+                                <div class="profile-name"><?php echo htmlspecialchars($booking['servicenames']); ?></div>
+                                <button class="View_button" onclick="showPopup(<?php echo $booking['bookid']; ?>)">View</button>
+                            </div>
+                        </li>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </ul>
         </li>
-<!-- History -->
-<li>
-          <div class="dropdownlink"><i class="fa-solid fa-clock-rotate-left"></i></i> History
-            <i class="fa fa-chevron-down" aria-hidden="true"></i>
-          </div>
-          <ul class="submenuItems">
-            <li><a href="#">You do not have a History</a></li>
-            <div class="profile-box">
-              <div class="code" hidden></div>
-                <div class="profile-name"></div>
-                <div class="profile-name"></div>
-                <button class="View_button1" onclick="showPopup1()">View</button>
-
-                
-            </div>
-          </ul>
-        </li> 
+        <!-- History -->
+        <li>
+            <div class="dropdownlink"><i class="fa-solid fa-clock-rotate-left"></i> History <i class="fa fa-chevron-down" aria-hidden="true"></i></div>
+            <ul class="submenuItems">
+                <li><a href="#">You do not have a History</a></li>
+                <div class="profile-box">
+                    <div class="code" hidden></div>
+                    <div class="profile-name"></div>
+                    <div class="profile-name"></div>
+                    <button class="View_button1" onclick="showPopup1()">View</button>
+                </div>
+            </ul>
+        </li>
 
         <li>
             <div class="dropdownlink pets_profile">
-              <a href="pet.php" ><i class="fa-solid fa-paw"></i>Pets</a>
+                <a href="pet.php"><i class="fa-solid fa-paw"></i> Pets</a>
             </div>
-          </li>
+        </li>
+    </ul>
 
-      </ul>
-    
-    <hr class="line2"></hr>
+    <hr class="line2">
     <div class="Log_out1">
-    <button class="Log_out_mobile" onclick="location.href='logout.php';">
-        <i class="fa-solid fa-arrow-right-from-bracket log_out_icon"></i> Log Out
-    </button>
-</div>
+        <button class="Log_out_mobile" onclick="location.href='logout.php';">
+            <i class="fa-solid fa-arrow-right-from-bracket log_out_icon"></i> Log Out
+        </button>
+    </div>
 
-    <!-- POP UP FOR BOOKINGS -->
-
+    <!-- Pop Up for Bookings -->
     <div class="overlay" id="overlay" onclick="hidePopup()">
-    <div class="popup" id="popup">
-
-    <button class="close-button" onclick="hidePopup()">&times;</button>
-    <form action="" >
-      <div class="first">  
-        <div class="first_1">
-          <p class="text" >Pet Name:</p>
-          <p class="petname">dsaef</p>
-        </div> 
-        <div class="first_2">
-          <p class="text">Pet Salon:</p>
-          <p class="petsalon">dsaads </p>
-          </div>
-      </div>
-      <div class="second" >
-        <div class="second_1">
-          <p class="text">Service:</p>
-          <p class="services">casvas</p> 
+        <div class="popup" id="popup">
+            <button class="close-button" onclick="hidePopup()">&times;</button>
+            <form action="">
+                <div class="first">
+                    <div class="first_1">
+                        <p class="text">Pet Name:</p>
+                        <p class="petname"></p>
+                    </div>
+                    <div class="first_2">
+                        <p class="text">Pet Salon:</p>
+                        <p class="petsalon"></p>
+                    </div>
+                </div>
+                <div class="second">
+                    <div class="second_1">
+                        <p class="text">Service:</p>
+                        <p class="services"></p>
+                    </div>
+                    <div class="second_2">
+                        <p class="text">Payment Method:</p>
+                        <p class="paymentmethod"></p>
+                    </div>
+                </div>
+                <div class="third">
+                    <div class="third_1">
+                        <p class="text">Date:</p>
+                        <p class="date1"></p>
+                    </div>
+                    <div class="third_2">
+                        <p class="text">Time:</p>
+                        <p class="time1"></p>
+                    </div>
+                </div>
+            </form>
+            <button class="cancel_button">Cancel Appointment</button>
         </div>
-        <div class="second_2">
-          <p class="text">Payment Method:</p>
-          <p class="paymentmethod">dwqd </p>
-          </div>
-      </div>
-      <div class="third" >
-        <div class="third_1">
-          <p class="text">Date:</p>
-          <p class="date1">dsadqw</p>
-        </div>
-        <div class="third_2">
-          <p class="text">Time:</p>
-          <p class="time1">sdada</p>
-          </div>
-      </div>
-      
-    </form>
-    
-    <button class="cancel_button">Cancel Appointment</button>
-    </div>      
     </div>
     
     <!-- POP UP FOR History -->
@@ -206,7 +279,53 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin']!== true) {
   
     
     
+    <!-- <script>
+        function showPopup(booking) {
+            document.getElementById('popup').style.display = 'block';
+            document.getElementById('overlay').style.display = 'block';
+
+        // Update HTML elements with booking data
+        document.querySelector('#popup.petname').textContent = booking.petname;
+        document.querySelector('#popup.petsalon').textContent = booking.shopname;
+        document.querySelector('#popup.services').textContent = booking.servicenames;
+        document.querySelector('#popup.paymentmethod').textContent = booking.paymentmethod;
+        document.querySelector('#popup.date1').textContent = booking.date;
+        document.querySelector('#popup.time1').textContent = booking.time;
+        }
+
+        function hidePopup() {
+            document.getElementById('popup').style.display = 'none';
+            document.getElementById('overlay').style.display = 'none';
+        }
+    </script> -->
+
     <script>
+    function showPopup(bookingID) {
+        // Send an AJAX request to booking2.php to fetch the data
+        $.ajax({
+            type: 'POST',
+            url: 'booking2.php',
+            data: { bookingID: bookingID },
+            dataType: 'json',
+            success: function(data) {
+          // Update the text content of the HTML elements with the corresponding class names
+          popup.querySelector('.petname').textContent = ['petname'];
+          popup.querySelector('.petsalon').textContent = ['shopname'];
+          popup.querySelector('.services').textContent = ['servicenames'];
+          popup.querySelector('.paymentmethod').textContent = ['paymentmethod'];
+          popup.querySelector('.date').textContent = ['date'];
+          popup.querySelector('.time').textContent = ['time'];
+        
+
+                // Show the popup
+                document.getElementById('popup').style.display = 'block';
+                document.getElementById('overlay').style.display = 'block';
+            }
+        });
+    }
+</script>
+
+<script>
       // Pop Up for Bookings
       function showPopup1() {
           document.getElementById('popup1').style.display = 'block';
@@ -218,7 +337,6 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin']!== true) {
           document.getElementById('overlay1').style.display = 'none';
       }
   </script>
-
     <script>
       // Pop Up for Bookings
       function showPopup() {

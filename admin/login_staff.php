@@ -31,7 +31,7 @@
         <form
           class="login-form"
           id="login-form"
-          action="login2.php"
+          action="login_staff2.php"
           method="post"
         >
           <div class="login_container">
@@ -40,8 +40,8 @@
   
               <input
                 type="email"
-                name="owneremail"
-                id="owneremail"
+                name="staffemail"
+                id="staffemail"
                 class="form_input"
                 placeholder="Your Email"
                 autocomplete="off"
@@ -55,8 +55,8 @@
                 <input
                 id="password-field"
                 type="password"
-                name="ownerpass"
-                id="ownerpass"
+                name="staffpass"
+                id="staffpass"
                 class="form_input1"
                 placeholder="Your Password"
                 autocomplete="off"
@@ -68,7 +68,7 @@
             </div>
   
             <input
-              href="admin.html"
+              href="admin.php"
               type="submit"
               class="btn"
               value="Login"

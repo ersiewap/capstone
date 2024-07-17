@@ -2,7 +2,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>Admin</title>
 
     <link
       rel="stylesheet"
@@ -17,11 +17,11 @@
   <body>
     <!-- Mobile Nav -->
     <div class="navbar">
-      <a href="admin.html"><i class="fa-solid fa-house"></i><br />Dashboard</a>
-      <a href="report.html"
+      <a href="admin.php"><i class="fa-solid fa-house"></i><br />Dashboard</a>
+      <a href="report.php"
         ><i class="fa-solid fa-newspaper"></i><br />Reports</a
       >
-      <a href="profile.html"><i class="fa-solid fa-user"></i><br />Admin</a>
+      <a href="profile.php"><i class="fa-solid fa-user"></i><br />Admin</a>
     </div>
 
     <!-- Web Nav -->
@@ -35,7 +35,7 @@
         <div class="menu">
           <ul class="menu-link">
             <li class="nav-link">
-              <a href="admin.html">
+              <a href="admin.php">
                 <svg
                   class="icon"
                   xmlns="http://www.w3.org/2000/svg"
@@ -51,7 +51,7 @@
 
             
             <li class="nav-link">
-              <a href="report.html">
+              <a href="report.php">
                 <svg
                   class="icon"
                   xmlns="http://www.w3.org/2000/svg"
@@ -81,7 +81,7 @@
                 <span class="title nav">Admin</span>
               </a>
               <ul class="dropdown-menu">
-                <li><a href="login_staff.html">Logout</a></li>
+                <li><a href="login_staff.php">Logout</a></li>
               </ul>
             </li>
           </ul>

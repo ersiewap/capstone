@@ -68,6 +68,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin']!== true) {
     <div class="Name">
         <h1>Hello, <?php echo htmlspecialchars($_SESSION['ownerfname']); ?>!</h1>
         <h2>Your Appointments</h2>
+        <p></p>
     </div>
 
     <div class="curved-box">

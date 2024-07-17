@@ -16,12 +16,12 @@
   <body>
     <!-- Mobile Nav -->
     <div class="navbar">
-      <a href="admin.html"><i class="fa-solid fa-house"></i><br />Dashboard</a>
+      <a href="admin.php"><i class="fa-solid fa-house"></i><br />Dashboard</a>
      
-      <a href="report.html"
+      <a href="report.php"
         ><i class="fa-solid fa-newspaper"></i><br />Reports</a
       >
-      <a href="profile.html"><i class="fa-solid fa-user"></i><br />Admin</a>
+      <a href="profile.php"><i class="fa-solid fa-user"></i><br />Admin</a>
     </div>
     <!-- Content -->
     <div id="all">
@@ -31,7 +31,7 @@
       </div>
 
       <div class="logout" >
-        <a style="color: black; text-decoration: none;" href="login_staff.html">Log Out</a>
+        <a style="color: black; text-decoration: none;" href="login_staff.php">Log Out</a>
       </div>
     </div>
   </body>

@@ -24,6 +24,7 @@ $time = $_POST['time'];
 $paymentmethod = $_POST['paymentmethod'];
 $service = isset($_POST['services']) ? $_POST['services'] : [];
 
+
 // Validate user input
 if (empty($petid) || empty($petsalon) || empty($date) || empty($time) || empty($paymentmethod) || empty($service)) {
     echo "Please fill in all required fields.";

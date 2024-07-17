@@ -2,7 +2,8 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Document</title>
+        <title>MIPS</title>
+        <link rel="icon" type="image/x-icon" href="favicon.ico">
         
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
         <link rel="stylesheet" href="book1.css">
@@ -63,6 +64,24 @@
             break;
         }
     }
+
+    // Fetch service names from the database
+$serviceNames = [];
+if (!empty($userservices)) {
+    $serviceIds =($userservices);
+    $sql = "SELECT servicename FROM services WHERE serviceid IN ($serviceIds)";
+    $result = $conn->query($sql);
+
+    if ($result->num_rows > 0) {
+        while($row = $result->fetch_assoc()) {
+            $serviceNames[] = htmlspecialchars($row['servicename']);
+        }
+    }
+}
+$serviceNames = implode(',',$serviceNames);
+
+$conn->close();
+
     ?>
 
     <body>
@@ -78,7 +97,7 @@
         <div class="box">
             <div class="contents">Service</div>
             <div class="services1">
-                <div class="contents1_service">Laboratory</div>
+                <div class="contents1_service"><?php echo ($serviceNames); ?></div>
                 <i onclick="this.parentElement.style.display='none'" class="fa-solid fa-x"></i>
             </div>
             
@@ -304,6 +323,8 @@
 
         // Submit the form
         document.getElementById('bookingForm').submit();
+
+        
     }
     </script>
 

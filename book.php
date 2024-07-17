@@ -2,7 +2,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>MIPS</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Sniglet:wght@400;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300&display=swap">
@@ -291,6 +292,23 @@ window.onclick = function(event) {
 }
 
     </script>
+
+<script>
+        // Function to set the min attribute to today's date
+        function setMinDate() {
+            const datePicker = document.getElementById('date');
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+            const day = String(today.getDate()).padStart(2, '0');
+            const todayDate = ${year}-${month}-${day};
+            datePicker.setAttribute('min', todayDate);
+        }
+
+        // Call the function when the page loads
+        window.onload = setMinDate;
+</script>
+
 
 </body>
 </html>

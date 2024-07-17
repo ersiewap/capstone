@@ -309,7 +309,7 @@ a.add_services_button{
     transition: background-color 0.2s;
   }
   
-  .cd-popup-container .cd-buttons li:first-child .yes-button {
+  .cd-popup-container .cd-buttons li:first-child button{
     background: #602147;
     width: 80%;
     border-radius: 5px;
