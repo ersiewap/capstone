@@ -47,6 +47,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin']!== true) {
     <nav class="nav">
         <ul class="main-nav">
             <li><a href="Homepage.php">Home</a></li>
+            <li><a href="Services.php">Services</a></li>
             <li><a href="location.php">Location</a></li>
             <li class="book_button"><a href="book.php"><button>Book Now!</button></a></li>
             <li class="dropdown">

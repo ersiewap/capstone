@@ -16,6 +16,54 @@
     <link rel="stylesheet" href="login_staff.css" />
   </head>
   <body>
+    <?php
+    // Start the session
+    session_start();
+
+    // Connect to the database
+    $conn = mysqli_connect("localhost", "root", "", "capstone");
+
+    // Check connection
+    if (!$conn) {
+        die("Connection failed: " . mysqli_connect_error());
+    }
+
+    // Check if the form has been submitted
+    if (isset($_POST['staffemail']) && isset($_POST['staffpass'])) {
+        // Retrieve the email and password from the form
+        $staffemail = $_POST['staffemail'];
+        $staffpass = $_POST['staffpass'];
+
+        // Retrieve the staff member's information from the database
+        $query = "SELECT * FROM staff WHERE staffemail = '$staffemail' AND staffpass = '$staffpass'";
+        $result = mysqli_query($conn, $query);
+        $row = mysqli_fetch_assoc($result);
+
+        // Check if the staff member's login credentials are correct
+        if ($row) {
+            // Retrieve the staff ID from the database
+            $staff_id = $row['staffid'];
+
+            // Retrieve the salon ID from the database
+            $salon_id = $row['salonid'];
+
+            // Store the staff ID and salon ID in the session
+            $_SESSION['staff_id'] = $staff_id;
+            $_SESSION['salonid'] = $salon_id;
+            $_SESSION['loggedin'] = true;
+
+            // Redirect the staff member to the dashboard page
+            header('Location: admin.php');
+            exit;
+        } else {
+            // Display an error message if the login credentials are incorrect
+            echo "Invalid email or password";
+        }
+    }
+
+    // Close the connection
+    mysqli_close($conn);
+    ?>
     <section class="section">
       <div  class="loggoo">
         <img
@@ -31,7 +79,7 @@
         <form
           class="login-form"
           id="login-form"
-          action="login_staff2.php"
+          action=""
           method="post"
         >
           <div class="login_container">
@@ -68,11 +116,9 @@
             </div>
   
             <input
-              href="admin.php"
               type="submit"
               class="btn"
               value="Login"
-              onclick="auth()"
             />
             
           </div>

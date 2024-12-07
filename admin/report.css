@@ -1,13 +1,4 @@
 
-@font-face {
-    font-family:MoreSugar ;
-    src: url(MoreSugar-Regular.ttf);
-    
-  }
-  @font-face {
-    font-family: Canda;
-    src: url(canda.ttf);
-  }
   * {
       box-sizing: border-box;
       margin: 0;
@@ -75,7 +66,7 @@
          height:60px;
          align-items: center;
          justify-content:space-between;
-         font-family:MoreSugar;
+         font-family: "Open Sans", sans-serif;
          }
    
          .navbar a {
@@ -96,7 +87,8 @@
          color: #FFD700;
          } 
          .dashboard{
-           font-family: MoreSugar;
+          font-family: "Lora", sans-serif;
+          font-weight: bold;
            text-transform: uppercase;  
            font-size: 25px;
            margin-left: 25px;
@@ -114,7 +106,7 @@
 }
 
 .search_report{
-  font-family: MoreSugar;
+  font-family: "Lora", sans-serif;
 }
 .report{
   display: flex;
@@ -128,15 +120,15 @@
 .report_select1{
   background-color: #602147;
   color: #FFF1F1;
-  font-family: canda;
+  font-family: "Poppins", sans-serif;
   font-size: 20px;
-  width: 100%;
+  width: auto;
   height: 100%;
   border: transparent;
   border-radius: 5px;
 }
 .search_from1{
-  font-family: MoreSugar;
+  font-family: "Lora", sans-serif;
 }
 .search_from{
   display: flex;
@@ -150,16 +142,16 @@
 .date_select{
   background-color: #602147;
   color: #FFF1F1;
-  font-family: canda;
+  font-family: "Poppins", sans-serif;
   font-size: 20px;
   margin-left: 20px;
-  width: 100%;
+  width: auto;
   height: 100%;
   border: transparent;
   border-radius: 5px;
 }
  .search_to1{
-  font-family: MoreSugar;
+  font-family: "Lora", sans-serif;
 }
 .search_to{
   display: flex;
@@ -173,10 +165,10 @@
 .date_select_to{
   background-color: #602147;
   color: #FFF1F1;
-  font-family: canda;
+  font-family: "Poppins", sans-serif;
   font-size: 20px;
   margin-left: 50px;
-  width: 100%;
+  width: auto;
   height: 100%;
   border: transparent;
   border-radius: 5px;
@@ -185,7 +177,7 @@
 .get_button{
   background-color: #FFD700;
   color: black;
-  font-family: 'Sniglet', cursive;
+  font-family: "Open Sans", sans-serif;
   font-size: 20px;
   margin-top: 20px;
   width: 70%;
@@ -198,6 +190,10 @@
     
   
 @media(min-width:962px){
+  .title{
+    font-family: "Open Sans", sans-serif;
+    
+  }
   .navbar{
     visibility: hidden;
     display: none;
@@ -261,9 +257,7 @@
   
 
   /* ======= nav-link ========  */
-.title{
-  font-family: MoreSugar;
-}
+
   li a svg {
     padding: calc(100% - 96%);
     margin-right: 10px;
@@ -389,7 +383,8 @@
 }
 
 .dashboard{
-  font-family: MoreSugar;
+  font-family: "Lora", sans-serif;
+  font-weight: bold;
   text-transform: uppercase;
   margin-top: 25px;
   
@@ -403,7 +398,7 @@
 }
 
 .search_report{
-  font-family: MoreSugar;
+  font-family: "Lora", sans-serif;
 }
 .report{
   display: flex;
@@ -417,7 +412,7 @@
 .report_select1{
   background-color: #602147;
   color: #FFF1F1;
-  font-family: canda;
+  font-family: "Poppins", sans-serif;
   font-size: 20px;
   width: 50vh;
   height: 100%;
@@ -425,7 +420,7 @@
   border-radius: 5px;
 }
 .search_from1{
-  font-family: MoreSugar;
+  font-family: "Lora", sans-serif;
 }
 .search_from{
   display: flex;
@@ -439,7 +434,7 @@
 .date_select{
   background-color: #602147;
   color: #FFF1F1;
-  font-family: canda;
+  font-family: "Poppins", sans-serif;
   font-size: 20px;
   margin-left: 20px;
   width: 50vh;
@@ -448,7 +443,7 @@
   border-radius: 5px;
 }
  .search_to1{
-  font-family: MoreSugar;
+  font-family: "Lora", sans-serif;
 }
 .search_to{
   display: flex;
@@ -462,7 +457,7 @@
 .date_select_to{
   background-color: #602147;
   color: #FFF1F1;
-  font-family: canda;
+  font-family: "Poppins", sans-serif;
   font-size: 20px;
   margin-left: 50px;
   width: 50vh;
@@ -474,7 +469,7 @@
 .get_button{
   background-color: #FFD700;
   color: black;
-  font-family: 'Sniglet', cursive;
+  font-family: "Open Sans", sans-serif;
   font-size: 20px;
   margin-left: 240px;
   margin-top: 20px;
@@ -482,5 +477,45 @@
   height: 15%;
   border: transparent;
   border-radius: 5px;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+.navbar {
+  background-color: #333;
+  color: white;
+  padding: 15px;
+}
+
+.navbar a {
+  color: white;
+  text-decoration: none;
+  padding: 10px;
+}
+
+.container1 {
+  padding: 20px;
+}
+
+.report_table {
+  margin-top: 20px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+th {
+  background-color: #f2f2f2;
 }
     }

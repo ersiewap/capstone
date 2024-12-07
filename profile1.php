@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
+<title>MIPS</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
+<link rel="icon" type="image/x-icon" href="favicon.ico">
 <link href="https://fonts.googleapis.com/css2?family=Sniglet:wght@400;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <link rel="stylesheet" href="profile1.css">
@@ -59,75 +60,46 @@ while ($row = $result->fetch_assoc()) {
   $bookings[] = $row;
 }
 
-$data = array();
-
-if (isset($_POST['petname']) && !empty($_POST['petname'])) {
-  $data['petname'] = $_POST['petname'];
-}
-
-if (isset($_POST['petsalon']) && !empty($_POST['petsalon'])) {
-  $data['petsalon'] = $_POST['petsalon'];
-}
-
-if (isset($_POST['date']) && !empty($_POST['date'])) {
-  $data['date'] = $_POST['date'];
-}
-
-if (isset($_POST['time']) && !empty($_POST['time'])) {
-  $data['time'] = $_POST['time'];
-}
-
-if (isset($_POST['paymentmethod']) && !empty($_POST['paymentmethod'])) {
-  $data['paymentmethod'] = $_POST['paymentmethod'];
-}
-
-if (isset($_POST['services']) && is_array($_POST['services'])) {
-  $data['servicenames'] = implode(', ', $_POST['services']);
-}
-
-echo json_encode($data);
-
-  
 $stmt->close();
 $conn->close();
 
 echo '<script>';
 echo 'console.log(' . json_encode($bookings) . ');'; // Logging $bookings to console
 echo '</script>';
-
 ?>
 
 <body>
 <!-- Mobile Nav -->
 <div class="navbar">
   <a href="Homepage.php" ><i class="fa-solid fa-house"></i><br>Home</a>
+  <a href="Services.php" ><i class="fa-solid fa-house"></i><br>Services</a>
   <a href="location.php"><i class="fa-solid fa-location-dot"></i><br>Location</a>
   <a href="book.php"><i class="fa-solid fa-plus"> </i> <br>Book</a>
   <a href="pet.php"><i class="fa-solid fa-paw"> </i><br>Pets</a>
   <a href="profile1.php"><i class="fa-solid fa-user"></i><br>Profile</a>
 </div>
 <!--Web Nav -->
-<header class="header">  
-  <div class="logo">
-      <a href="Homepage.php">
-          <img class="logo"src="logo-nav.png" alt="logo" >
-      </a>
-  </div>
-  <nav>
-      <ul class="main-nav">
-          <li><a href="Homepage.php">Home</a></li>
-          <li><a href="location.php">Location</a></li>
-          <li class="book_button"><a href="book.php"><button>Book Now!</button></a></li>
-          <li class="dropdown">
-              <a href="#"><i class="fa-solid fa-user circle-icon"></i></a>
-              <div class="dropdown-content">
-                <a href="profile1.php">Profile</a>
-                <a href="logout.php">Logout</a>
-              </div>
+<header class="header">
+    <div class="logo">
+        <a href="#">
+            <img class="logo" src="logo.png" alt="logo">
+        </a>
+    </div>
+    <nav class="nav">
+        <ul class="main-nav">
+            <li><a href="Homepage.php">Home</a></li>
+            <li><a href="Services.php">Services</a></li>
+            <li><a href="location.php">Location</a></li>
+            <li class="book_button"><a href="book.php"><button>Book Now!</button></a></li>
+            <li class="dropdown">
+                <a href="#"><i class="fa-solid fa-user circle-icon"></i></a>
+                <div class="dropdown-content">
+                    <a href="profile1.php">Profile</a>
+                    <a href="logout.php">Logout</a>
+                </div>
             </li>
-         
-      </ul>
-  </nav>
+        </ul>
+    </nav>
 </header>
 
     <!-- Content -->
@@ -165,20 +137,6 @@ echo '</script>';
                 <?php endif; ?>
             </ul>
         </li>
-        <!-- History -->
-        <li>
-            <div class="dropdownlink"><i class="fa-solid fa-clock-rotate-left"></i> History <i class="fa fa-chevron-down" aria-hidden="true"></i></div>
-            <ul class="submenuItems">
-                <li><a href="#">You do not have a History</a></li>
-                <div class="profile-box">
-                    <div class="code" hidden></div>
-                    <div class="profile-name"></div>
-                    <div class="profile-name"></div>
-                    <button class="View_button1" onclick="showPopup1()">View</button>
-                </div>
-            </ul>
-        </li>
-
         <li>
             <div class="dropdownlink pets_profile">
                 <a href="pet.php"><i class="fa-solid fa-paw"></i> Pets</a>
@@ -189,7 +147,7 @@ echo '</script>';
     <hr class="line2">
     <div class="Log_out1">
         <button class="Log_out_mobile" onclick="location.href='logout.php';">
-            <i class="fa-solid fa-arrow-right-from-bracket log_out_icon"></i> Log Out
+            <i class="fa-solid fa-arrow-right-from-bracket log_out _icon"></i> Log Out
         </button>
     </div>
 
@@ -201,163 +159,68 @@ echo '</script>';
                 <div class="first">
                     <div class="first_1">
                         <p class="text">Pet Name:</p>
-                        <p class="petname"></p>
+                        <input type="hidden" name="petname" value="">
+                        <p class="petname" id="petname"></p>
                     </div>
                     <div class="first_2">
                         <p class="text">Pet Salon:</p>
-                        <p class="petsalon"></p>
+                        <p class="petsalon" id="petsalon"></p>
                     </div>
                 </div>
                 <div class="second">
                     <div class="second_1">
                         <p class="text">Service:</p>
-                        <p class="services"></p>
+                        <p class="services" id="services"></p>
                     </div>
                     <div class="second_2">
                         <p class="text">Payment Method:</p>
-                        <p class="paymentmethod"></p>
+                        <p class="paymentmethod" id="paymentmethod"></p>
                     </div>
                 </div>
                 <div class="third">
                     <div class="third_1">
                         <p class="text">Date:</p>
-                        <p class="date1"></p>
+                        <p class="date1" id="date1"></p>
                     </div>
                     <div class="third_2">
                         <p class="text">Time:</p>
-                        <p class="time1"></p>
+                        <p class="time1" id="time1"></p>
                     </div>
                 </div>
             </form>
             <button class="cancel_button">Cancel Appointment</button>
         </div>
     </div>
-    
-    <!-- POP UP FOR History -->
-    <div class="overlay1" id="overlay1" onclick="hidePopup1()">
-    <div class="popup1" id="popup1">
-      
-    <button class="close-button1" onclick="hidePopup1()">&times;</button>
-    <form action="" >
-      <div class="first1">  
-        <div class="first_11">
-          <p class="text1" >Pet Name:</p>
-          <p class="petname1">dsaef</p>
-        </div> 
-        <div class="first_1">
-          <p class="text1">Pet Salon:</p>
-          <p class="petsalon1">dsaads </p>
-          </div>
-      </div>
-      <div class="second2" >
-        <div class="second_12">
-          <p class="text1">Service:</p>
-          <p class="services2">casvas</p> 
-        </div>
-        <div class="second_22">
-          <p class="text1">Payment Method:</p>
-          <p class="paymentmethod2">dwqd </p>
-          </div>
-      </div>
-      <div class="third3" >
-        <div class="third_13">
-          <p class="text1">Date:</p>
-          <p class="date13">dsadqw</p>
-        </div>
-        <div class="third_23">
-          <p class="text1">Time:</p>
-          <p class="time13">sdada</p>
-          </div>
-      </div>
-      <div class="fourth">
-        <p class="text1">Status:</p>
-        <p class=" status">das </p>
-      </div>
-    </form>
-    </div>
-    </div>
-  
-    
-    
-    <!-- <script>
-        function showPopup(booking) {
-            document.getElementById('popup').style.display = 'block';
-            document.getElementById('overlay').style.display = 'block';
-
-        // Update HTML elements with booking data
-        document.querySelector('#popup.petname').textContent = booking.petname;
-        document.querySelector('#popup.petsalon').textContent = booking.shopname;
-        document.querySelector('#popup.services').textContent = booking.servicenames;
-        document.querySelector('#popup.paymentmethod').textContent = booking.paymentmethod;
-        document.querySelector('#popup.date1').textContent = booking.date;
-        document.querySelector('#popup.time1').textContent = booking.time;
-        }
-
-        function hidePopup() {
-            document.getElementById('popup').style.display = 'none';
-            document.getElementById('overlay').style.display = 'none';
-        }
-    </script> -->
 
     <script>
+    var bookings = <?php echo json_encode($bookings); ?>;
     function showPopup(bookingID) {
-        // Send an AJAX request to booking2.php to fetch the data
-        $.ajax({
-            type: 'POST',
-            url: 'booking2.php',
-            data: { bookingID: bookingID },
-            dataType: 'json',
-            success: function(data) {
-          // Update the text content of the HTML elements with the corresponding class names
-          popup.querySelector('.petname').textContent = ['petname'];
-          popup.querySelector('.petsalon').textContent = ['shopname'];
-          popup.querySelector('.services').textContent = ['servicenames'];
-          popup.querySelector('.paymentmethod').textContent = ['paymentmethod'];
-          popup.querySelector('.date').textContent = ['date'];
-          popup.querySelector('.time').textContent = ['time'];
-        
-
-                // Show the popup
+        for (var i = 0; i < bookings.length; i++) {
+            if (bookings[i].bookid === bookingID) {
+                var booking = bookings[i];
+                document.getElementById('petname').textContent = booking.petname;
+                document.getElementById('petsalon').textContent = booking.shopname;
+                document.getElementById('services').textContent = booking.servicenames;
+                document.getElementById('paymentmethod').textContent = booking.paymentmethod;
+                document.getElementById('date1').textContent = booking.date;
+                document.getElementById('time1').textContent = booking.time;
+                document.getElementById('statusText').textContent = booking.status;
+                
                 document.getElementById('popup').style.display = 'block';
                 document.getElementById('overlay').style.display = 'block';
             }
-        });
+        }
     }
-</script>
 
-<script>
-      // Pop Up for Bookings
-      function showPopup1() {
-          document.getElementById('popup1').style.display = 'block';
-          document.getElementById('overlay1').style.display = 'block';
-      }
-  
-      function hidePopup1() {
-          document.getElementById('popup1').style.display = 'none';
-          document.getElementById('overlay1').style.display = 'none';
-      }
-  </script>
+    function hidePopup() {
+        document.getElementById('popup').style.display = 'none';
+        document.getElementById('overlay').style.display = 'none';
+    }
+    </script>
+
+    <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
     <script>
-      // Pop Up for Bookings
-      function showPopup() {
-          document.getElementById('popup').style.display = 'block';
-          document.getElementById('overlay').style.display = 'block';
-      }
-  
-      function hidePopup() {
-          document.getElementById('popup').style.display = 'none';
-          document.getElementById('overlay').style.display = 'none';
-      }
-  </script>
-    
-
-    
-    
-      
-
-
-      <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
-      <script>$(function() {
+      $(function() {
           var Accordion = function(el, multiple) {
             this.el = el || {};
             // more then one submenu open?
@@ -386,6 +249,6 @@ echo '</script>';
           
           var accordion = new Accordion($('.accordion-menu'), false);
         })
-        </script>
+    </script>
 </body>
 </html>

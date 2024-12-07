@@ -42,6 +42,8 @@ $stmt->execute();
 // Check for successful insertion
 if ($stmt->affected_rows > 0) {
     echo "New record created successfully";
+    header("Location: book.php");
+    exit;
 } else {
     echo "Error: " . $stmt->error;
 }
