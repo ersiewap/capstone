@@ -33,7 +33,7 @@ if ($conn->connect_error) {
 
 $ownerID = $_SESSION['ownerID'];
 
-$sql = "SELECT b.bookid, p.petname, b.serviceid, b.date, b.time, b.paymentmethod, s.shopname
+$sql = "SELECT b.bookid, p.petname, b.serviceid, b.date, b.time, b.paymentmethod, s.shopname, b.status
         FROM book b
         JOIN petinfo p ON b.petid = p.petid
         JOIN salon s ON b.salonid = s.salonid
@@ -50,16 +50,21 @@ while ($row = $result->fetch_assoc()) {
     $serviceIds = explode(',', $row['serviceid']);
     $serviceNames = [];
     foreach ($serviceIds as $serviceId) {
-      $serviceId = intval($serviceId);
-      $serviceResult = $conn->query("SELECT servicename  FROM services WHERE serviceid = $serviceId");
-      if ($serviceRow = $serviceResult->fetch_assoc()) {
-          $serviceNames[] = $serviceRow['servicename'];
-      }
-  }
+        $serviceId = intval($serviceId);
+        $serviceResult = $conn->query("SELECT servicename FROM services WHERE serviceid = $serviceId");
+        if ($serviceRow = $serviceResult->fetch_assoc()) {
+            $serviceNames[] = $serviceRow['servicename'];
+        }
+    }
 
-  $row['servicenames'] = implode(', ', $serviceNames); // Convert array to comma-separated string
-  $row['petname'] = $row['petname']; // Add petname key to the row array
-  $bookings[] = $row;
+    // Convert array to comma-separated string
+    $row['servicenames'] = implode(', ', $serviceNames);
+    $row['petname'] = $row['petname']; // Add petname key to the row array
+
+    // Set the status based on the appointment_status value
+    $row['status'] = ($row['appointment_status'] == 0) ? "On Going" : "Cancelled";
+
+    $bookings[] = $row;
 }
 
 $stmt->close();

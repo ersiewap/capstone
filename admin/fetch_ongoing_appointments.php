@@ -28,5 +28,9 @@ $data = [];
 while ($row = $result->fetch_assoc()) {
     $data[] = $row; // Push each row into the data array
 }
+
+// Debugging: Log the fetched data
+error_log(print_r($data, true), 3, "debug.log");
+
 echo json_encode($data); // Return the data as JSON
 ?>

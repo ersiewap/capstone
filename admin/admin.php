@@ -144,35 +144,43 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
     </main>
 
     <script>
-        const appointmentsTableBody = document.getElementById("appointments-table-body");
+    const appointmentsTableBody = document.getElementById("appointments-table-body");
+    const activeApptsCount = document.querySelector('.number_appts');
+    const activePntsCount = document.querySelector('.number_pnts');
 
-        // Fetch data for all appointments from the server
-        Promise.all([
-            fetch('fetch_data.php').then(response => response.json()),
-            fetch('fetch_ongoing_appointments.php').then(response => response.json())
-        ])
-        .then(([existingData, ongoingData]) => {
-            const combinedData = [...existingData, ...ongoingData];
-            let html = '';
-            combinedData.forEach(appointment => {
-                html += `
-                    <tr>
-                        <td>${appointment.appointment_id || appointment.bookID}</td>
-                        <td>${appointment.pet_name}</td>
-                        <td>${appointment.owner_name}</td>
-                        <td>${appointment.salon}</td>
-                        <td>${appointment.services}</td>
-                        <td>${appointment.date}</td>
-                        <td>${appointment.time}</td>
-                        <td>${appointment.payment_method}</td>
-                        <td>${appointment.total_fees}</td>
-                        <td>${appointment.appointment_status}</td>
-                    </tr>
-                `;
-            });
-            appointmentsTableBody.innerHTML = html;
-        })
-        .catch(error => console.error('Error:', error));
-    </script>
+    // Fetch data for all ongoing appointments and patients from the server
+    Promise.all([
+        fetch('fetch_ongoing_appointments.php').then(response => response.json()),
+        fetch('fetch_active_patients.php').then(response => response.json()) // Assuming you have an endpoint for active patients
+    ])
+    .then(([ongoingAppointments, activePatients]) => {
+        // Update the active appointments count
+        activeApptsCount.textContent = ongoingAppointments.length;
+
+        // Update the active patients count
+        activePntsCount.textContent = activePatients.length;
+
+        // Populate the appointments table
+        let html = '';
+        ongoingAppointments.forEach(appointment => {
+            html += `
+                <tr>
+                    <td>${appointment.appointment_id || appointment.bookID}</td>
+                    <td>${appointment.pet_name}</td>
+                    <td>${appointment.owner_name}</td>
+                    <td>${appointment.salon}</td>
+                    <td>${appointment.services}</td>
+                    <td>${appointment.date}</td>
+                    <td>${appointment.time}</td>
+                    <td>${appointment.payment_method}</td>
+                    <td>${appointment.total_fees}</td>
+                    <td>${appointment.appointment_status}</td>
+                </tr>
+            `;
+        });
+        appointmentsTableBody.innerHTML = html;
+    })
+    .catch(error => console.error('Error:', error));
+</script>
 </body>
 </html>
