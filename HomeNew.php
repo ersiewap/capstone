@@ -13,12 +13,62 @@
 
 <?php
 session_start();
-if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin']!== true) {
-    
-  echo "<script>alert('You need to log in to view this page.');</script>";
-  header('refresh:2; url=Login&Register.php');
-  exit;
+if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
+    header("Location: login.php"); // Redirect to login page if not logged in
+    exit;
 }
+
+$servername = "localhost";
+$username = "root";
+$password = "";
+$dbname = "capstone";
+
+// Create connection
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+$ownerID = $_SESSION['ownerID'];
+
+// Prepare the SQL query to get all ongoing bookings
+$sql = "SELECT b.bookid, p.petname, b.serviceid, s.shopname, b.date
+        FROM book b
+        JOIN petinfo p ON b.petid = p.petid
+        JOIN salon s ON b.salonid = s.salonid
+        WHERE b.ownerID = ? AND b.status = 0"; // Assuming status = 0 means ongoing
+
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $ownerID);
+$stmt->execute();
+$result = $stmt->get_result();
+
+$ongoingBookings = []; // Initialize variable for ongoing bookings
+
+while ($row = $result->fetch_assoc()) {
+    $ongoingBookings[] = $row; // Store ongoing bookings
+}
+
+// Close the statement
+$stmt->close();
+
+// Now fetch service names while the connection is still open
+$serviceNames = [];
+foreach ($ongoingBookings as $booking) {
+    $serviceIds = explode(',', $booking['serviceid']);
+    foreach ($serviceIds as $serviceId) {
+        $serviceId = intval($serviceId);
+        $serviceResult = $conn->query("SELECT servicename FROM services WHERE serviceid = $serviceId");
+        if ($serviceRow = $serviceResult->fetch_assoc()) {
+            $serviceNames[$booking['bookid']][] = $serviceRow['servicename'];
+        }
+    }
+}
+
+// Close the connection
+$conn->close();
 ?>
 
 <body>
@@ -77,14 +127,24 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin']!== true) {
     </div>
   </div>`
   
-  <!-- Square Container with Text and View Button -->
   <div class="appointment-container">
-    <div class="appointment-content">
-      <h3>Laboratory</h3>
-      <p>Molly</p>
-    </div>
-    <a href="#" class="view-button">View</a>
-  </div>
+    <h3>Your Ongoing Bookings</h3>
+    <?php if (!empty($ongoingBookings)): ?>
+        <?php foreach ($ongoingBookings as $booking): ?>
+            <div class="booking">
+                <p>Pet Name: <?php echo htmlspecialchars($booking['petname']); ?></p>
+                <p>Salon: <?php echo htmlspecialchars($booking['shopname']); ?></p>
+                <p>Service: <?php echo htmlspecialchars(implode(', ', $serviceNames[$booking['bookid']])); ?></p>
+                <p>Booking Date: <?php echo htmlspecialchars($booking['date']); ?></p> <!-- Displaying the booking date -->
+            </div>
+            <hr>
+        <?php endforeach; ?>
+    <?php else: ?>
+        <p>No ongoing bookings found.</p>
+    <?php endif; ?>
+    <a href="YourProfile.php?tab=appointments" class="view-button">View All Appointments</a>
+</div>
+
   
   <!-- Pet Care Tips Section -->
   <div class="pet-care-tips">

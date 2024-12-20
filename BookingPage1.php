@@ -1,27 +1,28 @@
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Document</title>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-        <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&display=swap" rel="stylesheet">
-        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
-        <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
-        <link rel="stylesheet" href="BookingPage1.css">
-        
-        <!-- calendarjs -->
-        <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
-        <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/bootstrap5@6.1.15/index.global.min.js"></script>
-        <style>
-            #calendar {
-                /* max-width: 600px; */
-                margin: 40px auto; 
-                background-color: #f9f9f9; /* Light gray background */
-                border: 1px solid #ccc;   /* Optional border */
-                border-radius: 8px;       /* Optional rounded corners */
-            }
-        </style>
-    </head>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="BookingPage1.css">
+    
+    <!-- calendarjs -->
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
+    <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/bootstrap5@6.1.15/index.global.min.js"></script>
+    <style>
+        #calendar {
+            /* max-width: 600px; */
+            margin: 40px auto; 
+            background-color: #f9f9f9; /* Light gray background */
+            border: 1px solid #ccc;   /* Optional border */
+            border-radius: 8px;       /* Optional rounded corners */
+        }
+    </style>
+</head>
     <?php
     session_start();
     if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin']!== true) {
@@ -124,66 +125,73 @@
 
         <section class="background_book">
             <div class=" book_word"> BOOK AN <br> APPOINTMENT</div>
+            
             <div class=" booking_box" id="booking">
-            <form method="POST" action="book1.php">
+            <form method="POST" action="BookingPage2.php">
                 <div class="booking_items">Pick a Pet</div>
+                
                 <div id="pet_select0">
-                <select class="pet_select">
-                    <?php foreach ($pets as $pet) { ?>
-                        <option value="<?php echo $pet['petid']; ?>"><?php echo $pet['petname']; ?></option>
-                    <?php } ?>
-                </select>
+                    <select class="pet_select" name="pet_id">
+                        <?php foreach ($pets as $pet) { ?>
+                            <option value="<?php echo $pet['petid']; ?>"><?php echo $pet['petname']; ?></option>
+                        <?php } ?>
+                    </select>
                 </div>    
+                
                 <div class="booking_items">Pick a Salon</div>
+                
                 <div id="salon_select0">
-                    <select class="salon_select" id="salon_select">
-                    <?php foreach ($salons as $salon) { ?>
-                        <option value="<?php echo $salon['salonid']; ?>" >
-                            <?php echo $salon['shopname']; ?>
-                        </option>
-                    <?php } ?>
+                    <select class="salon_select" id="salon_select" name="salon_id">
+                        <?php foreach ($salons as $salon) { ?>
+                            <option value="<?php echo $salon['salonid']; ?>" >
+                                <?php echo $salon['shopname']; ?>
+                            </option>
+                        <?php } ?>
                     </select>
                 </div>
             
                 <div class="booking_items">Pick a Service</div>
+                
                 <div id="id_pick_service">
-                <?php 
-                foreach ($services as $service) { ?>
-                    <label><input type="checkbox" class="service_checkbox" name="serviceid[]" value="<?php echo $service['serviceid']; ?>" data-amount="<?php echo $service['price']; ?>">
-                    <span><?php echo $service['servicename']; ?> (₱<?php echo number_format($service['price'],2); ?>)</span></label>
-                    <br>
-                    
-                <?php } ?>
+                    <?php 
+                    foreach ($services as $service) { ?>
+                        <label><input type="checkbox" class="service_checkbox" name="serviceid[]" value="<?php echo $service['serviceid']; ?>" data-amount="<?php echo $service['price']; ?>">
+                        <span><?php echo $service['servicename']; ?> (₱<?php echo number_format($service['price'],2); ?>)</span></label>
+                        <br>
+                        
+                    <?php } ?>
                 </div>    
                 
 
-                    <hr class="line2"></hr>
+                <hr class="line2"></hr>
 
             
                 <div class="calendar-container">   
                     <div class="calendar-headerjs"> 
-                        <div id="calendar"></div>    
+                        <div id="calendar"></div>
+                        <input type="hidden" id="selectedDate" name="selected_date">    
                     </div>    
-                    <div class="slots calendar-time" id="timeSlots2"><?php include ("timeSlots2.php")?>;</div>
+                    
+                    <div class="slots calendar-time" id="timeSlots2" name="meeting_time"><?php include ("timeSlots2.php")?>;</div>
                 </div>    
 
                 <hr class="line3"></hr>
+                
                 <div class="booking_items">Payment Method</div>
-                    <form id="payment_select0">
-                        <select class="payment_select">
-                            <option>Gcash</option>
-                            <option>Cash</option>
-                        </select>
-                    </form>
-
-                    <hr class="line4"></hr>
+                
+                <select class="payment_select" name="payment_method">
+                    <option value="gcash">Gcash</option>
+                    <option value="cash">Cash</option>
+                </select>
+                    
+                <hr class="line4"></hr>
+                
                 <div class="fee">
                     <h3 class="amount" id="total">Total Amount: Php0.00</h3>
                 </div>
-            </div>
-                </div>
             
-                <a><button class="button_next">Next</button></a>
+            
+                <a><button type="submit" class="button_next">Next</button></a>
                 <!-- Modal Structure -->
                 <div id="popupModal" class="modal">
                     <div class="modal-content">
@@ -191,7 +199,9 @@
                         <p>Please complete all details to proceed.</p>
                     </div>
                 </div>
-            </form>            
+            </form> 
+            
+            </div>
         </section>
 
         <script>
@@ -203,7 +213,8 @@
                 const serviceCheckbox = document.querySelectorAll('.service_checkbox');
                 const totalAmount = document.getElementById('total');
 
-                
+                //generate the default timeslot on first load
+                generateTimeSlots(1);
                 
                 //select chain of salon to service
                 salonSelect.addEventListener('change', function () {
@@ -235,6 +246,8 @@
                                 serviceCheckCreated.forEach(checkbox => {
                                     checkbox.addEventListener('change', updateTotal);
                                 });
+
+                                generateTimeSlots(salonId);
                             })
                             .catch(error => {
                                 console.error('Error fetching subcategories:', error);
@@ -296,16 +309,16 @@
                 totalAmount.textContent = total.toFixed(2);
             };
 
-        fetch('/capstone/get-booked-dates.php')
-            .then(response => response.json())
-            .then(data => {
-                // Update salonBookedDates with the fetched data
-                salonBookedDates = data;
+        // fetch('/capstone/get-booked-dates.php')
+        //     .then(response => response.json())
+        //     .then(data => {
+        //         // Update salonBookedDates with the fetched data
+        //         salonBookedDates = data;
 
-                // Render the calendar
-                renderCalendar();
-            })
-            .catch(error => console.error('Error fetching booked dates:', error));
+        //         // Render the calendar
+        //         renderCalendar();
+        //     })
+        //     .catch(error => console.error('Error fetching booked dates:', error));
 
 
 
@@ -314,36 +327,36 @@
 const modal = document.getElementById("popupModal");
 const closeModal = document.getElementsByClassName("close")[0];
 
-document.querySelector('.button_next').addEventListener('click', function(event) {
-    event.preventDefault(); // Prevent default form submission
+    // document.querySelector('.button_next').addEventListener('click', function(event) {
+    //     event.preventDefault(); // Prevent default form submission
+    //     console.log(`MAMA MO`);
+    //     // Check if all required fields are filled
+    //     const petSelect = document.querySelector('.pet_select').value;
+    //     const salonSelect = document.querySelector('#salon_select').value;
+    //     const servicesChecked = document.querySelectorAll('input[name="services"]:checked').length > 0;
+    //     const dateSelected = document.querySelector('#date').value;
+    //     const timeSelected = document.querySelector('#meeting-time').value;
+    //     const paymentSelect = document.querySelector('.payment_select').value;
 
-    // Check if all required fields are filled
-    const petSelect = document.querySelector('.pet_select').value;
-    const salonSelect = document.querySelector('#salon_select').value;
-    const servicesChecked = document.querySelectorAll('input[name="services"]:checked').length > 0;
-    const dateSelected = document.querySelector('#date').value;
-    const timeSelected = document.querySelector('#meeting-time').value;
-    const paymentSelect = document.querySelector('.payment_select').value;
+    //     var checkboxes = document.querySelectorAll('input[name="services"]:checked');
 
-    var checkboxes = document.querySelectorAll('input[name="services"]:checked');
+    //     // Initialize an array to store the selected values
+    //     var selectedItems = [];
 
-    // Initialize an array to store the selected values
-    var selectedItems = [];
+    //     // Loop through the checkboxes and get their values
+    //     checkboxes.forEach(function(checkbox) {
+    //         selectedItems.push(checkbox.value);
+    //         });
 
-    // Loop through the checkboxes and get their values
-    checkboxes.forEach(function(checkbox) {
-        selectedItems.push(checkbox.value);
-        });
-
-        // Validate inputs
-        if (!petSelect || !salonSelect || !servicesChecked || !dateSelected || !timeSelected || !paymentSelect || !servicesChecked) {
-        modal.style.display = "block"; // Show the modal
-    } else {
-        // Proceed to the next page
-        window.location.href = `book1.php?salon=${salonSelect}&pet=${petSelect}&date=${dateSelected}
-        &meeting-time=${timeSelected}&payment=${paymentSelect}&service=${selectedItems}`;
-    }
-});
+    //         // Validate inputs
+    //         if (!petSelect || !salonSelect || !servicesChecked || !dateSelected || !timeSelected || !paymentSelect || !servicesChecked) {
+    //         modal.style.display = "block"; // Show the modal
+    //     } else {
+    //         // Proceed to the next page
+    //         window.location.href = `book1.php?salon=${salonSelect}&pet=${petSelect}&date=${dateSelected}
+    //         &meeting-time=${timeSelected}&payment=${paymentSelect}&service=${selectedItems}`;
+    //     }
+    // });
 
 
     // Close the modal when the close button is clicked

@@ -1,9 +1,16 @@
 <?php
-// database details
-$con = mysqli_connect("localhost","root","","capstone");
+// dbconnection.php
 
-if (mysqli_connect_errno()) {
-    echo "Connection Failed" . mysqli_connect_error();
+$servername = "localhost"; // Your database server
+$username = "root"; // Your database username
+$password = ""; // Your database password
+$dbname = "capstone"; // Your database name
+
+// Create connection
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
 }
-    // close connection
 ?>

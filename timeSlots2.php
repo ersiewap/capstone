@@ -1,35 +1,23 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Time Slot Selection</title>
-</head>
-<body>
+
     <h1>Select a Time Slot</h1>
     
-    <div>
+    <!-- <div>
         <label for="salonSelect">Select a Salon:</label>
         <select id="salonSelect">
             <option value="vetterhealth">Vetter Health</option>
             <option value="kanji">Kanji</option>
             <option value="davids">Davids</option>
         </select>
-    </div>
+    </div> -->
 
-    <form action="process_time_slot.php" method="post">
-        <div id="timeSlotsContainer">
-            <!-- Time slots will be dynamically generated here -->
-        </div>
-        <input type="submit" value="Submit">
-    </form>
-
+    <div id="timeSlotsContainer"></div>
+    
     <script>
         // Define the time slots for each salon
         const salonTimeSlots = {
-            'vetterhealth': { start: 8, end: 17 }, // 8 AM to 5 PM
-            'kanji': { start: 8, end: 17 }, // 8 AM to 5 PM
-            'davids': { start: 9, end: 19 } // 9 AM to 7 PM
+            '1': { start: 8, end: 17 }, // 8 AM to 5 PM
+            '2': { start: 8, end: 17 }, // 8 AM to 5 PM
+            '3': { start: 9, end: 19 } // 9 AM to 7 PM
         };
 
         // Function to generate time slots based on selected salon
@@ -55,13 +43,11 @@
         }
 
         // Event listener for salon selection
-        document.getElementById('salonSelect').addEventListener('change', function() {
-            const selectedSalon = this.value;
-            generateTimeSlots(selectedSalon); // Generate time slots based on selected salon
-        });
+        // document.getElementById('salonSelect').addEventListener('change', function() {
+        //     const selectedSalon = this.value;
+        //     generateTimeSlots(selectedSalon); // Generate time slots based on selected salon
+        // });
 
         // Initial call to generate time slots for the default selected salon
-        generateTimeSlots(document.getElementById('salonSelect').value);
+        // generateTimeSlots(document.getElementById('salonSelect').value);
     </script>
-</body>
-</html>

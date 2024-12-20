@@ -39,6 +39,7 @@ document.addEventListener('DOMContentLoaded', function() {
     dateClick: function (info) {
       // Triggered when a date is clicked
       handleDateClick(info.dateStr); // Pass the clicked date to your function
+      document.getElementById('selectedDate').value = info.startStr;
     },
     
   });
