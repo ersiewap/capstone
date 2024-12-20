@@ -65,7 +65,6 @@ class MYPDF extends TCPDF {
             $this->Cell($w[2], 6, htmlspecialchars($row['petid']), 'LR', 0, 'L', $fill);
             $this->Cell($w[3], 6, htmlspecialchars($row['salonid']), 'LR', 0, 'L', $fill);
             $this->Cell($w[4], 6, htmlspecialchars($row['servicenames']), 'LR', 0, 'L', $fill); // Displaying concatenated service names
-            $this->Cell($w[5], 6, htmlspecialchars($row['date']), 'LR', 0, 'L', $fill);
             $this->Cell($w[6], 6, htmlspecialchars($row['time']), 'LR', 0, 'L', $fill);
             $this->Cell($w[7], 6, htmlspecialchars($row['paymentmethod']), 'LR', 0, 'L', $fill);
             $this->Cell($w[8], 6, htmlspecialchars($row['is_cancelled']), 'LR', 0, 'L', $fill);
@@ -110,18 +109,25 @@ $pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
 // Add a page
 $pdf->AddPage();
 
-// Get data from the database
-$startDate = $_GET['startDate'];
-$endDate = $_GET['endDate'];
-$salonId = $_GET['salonid'];
-$data = $pdf->LoadData($startDate, $endDate, $salonId);
+// Get data from the POST request
+$startDate = $_POST['startDate'] ?? null;
+$endDate = $_POST['endDate'] ?? null;
+$salonId = $_POST['salonid'] ?? null;
 
-// Define the header
-$header = array('Book ID', 'Owner ID', 'Pet ID', 'Salon ID', 'Service Names', 'Date', 'Time', 'Payment Method', 'Is Cancelled', 'Cancel Date', 'Status', 'Payment Price');
+// Check if the required parameters are set
+if ($startDate && $endDate && $salonId) {
+    $data = $pdf->LoadData($startDate, $endDate, $salonId);
 
-// Print colored table
-$pdf->ColoredTable($header, $data);
+    // Define the header
+    $header = array('Book ID', 'Owner ID', 'Pet ID', 'Salon ID', 'Service Names', 'Date', 'Time', 'Payment Method', 'Is Cancelled', 'Cancel Date', 'Status', 'Payment Price');
 
-// Close and output PDF document
-$pdf->Output('service_report.pdf', 'I');
+    // Print colored table
+    $pdf->ColoredTable($header, $data);
+
+    // Close and output PDF document
+    $pdf->Output('service_report.pdf', 'I');
+} else {
+    // Handle the case where parameters are missing
+    echo "Error: Missing parameters.";
+}
 ?>

@@ -128,7 +128,7 @@ echo '</script>';
 <!-- Bookings -->
     <ul class="accordion-menu">
         <li>
-          <div class="dropdownlink"><i class="fa-regular fa-calendar-days"></i></i> Bookings
+          <div class="dropdownlink"><i class="fa-regular fa-calendar-days"></i></i> Appointments
             <i class="fa fa-chevron-down" aria-hidden="true"></i>
           </div>
           <ul class="submenuItems">

@@ -7,25 +7,61 @@
 </head>
 <body>
     <h1>Select a Time Slot</h1>
+    
+    <div>
+        <label for="salonSelect">Select a Salon:</label>
+        <select id="salonSelect">
+            <option value="vetterhealth">Vetter Health</option>
+            <option value="kanji">Kanji</option>
+            <option value="davids">Davids</option>
+        </select>
+    </div>
+
     <form action="process_time_slot.php" method="post">
-        <?php
-        // Define the start and end times
-        $startTime = 9; // 9 AM
-        $endTime = 13; // 1 PM (13 in 24-hour format)
-
-        // Loop through the hours and create radio buttons
-        for ($hour = $startTime; $hour < $endTime; $hour++) {
-            // Format the hour for display (AM/PM)
-            $displayHour = ($hour > 12) ? ($hour - 12) . ' PM' : $hour . ' AM';
-            $value = ($hour < 10) ? '0' . $hour . ':00' : $hour . ':00'; // Value for the radio button
-
-            echo '<div>';
-            echo '<input type="radio" id="timeSlot' . $hour . '" name="timeSlot" value="' . $value . '">';
-            echo '<label for="timeSlot' . $hour . '">' . $displayHour . '</label>';
-            echo '</div>';
-        }
-        ?>
+        <div id="timeSlotsContainer">
+            <!-- Time slots will be dynamically generated here -->
+        </div>
         <input type="submit" value="Submit">
     </form>
+
+    <script>
+        // Define the time slots for each salon
+        const salonTimeSlots = {
+            'vetterhealth': { start: 8, end: 17 }, // 8 AM to 5 PM
+            'kanji': { start: 8, end: 17 }, // 8 AM to 5 PM
+            'davids': { start: 9, end: 19 } // 9 AM to 7 PM
+        };
+
+        // Function to generate time slots based on selected salon
+        function generateTimeSlots(salon) {
+            const timeSlotsContainer = document.getElementById('timeSlotsContainer');
+            timeSlotsContainer.innerHTML = ''; // Clear previous time slots
+
+            if (salonTimeSlots[salon]) {
+                const schedule = salonTimeSlots[salon];
+                for (let hour = schedule.start; hour < schedule.end; hour++) {
+                    // Format the hour for display (AM/PM)
+                    const displayHour = (hour >= 12) ? (hour - 12) + ' PM' : hour + ' AM';
+                    const value = (hour < 10) ? '0' + hour + ':00' : hour + ':00'; // Value for the radio button
+
+                    const div = document.createElement('div');
+                    div.innerHTML = `
+                        <input type="radio" id="timeSlot${hour}" name="timeSlot" value="${value}">
+                        <label for="timeSlot${hour}">${displayHour}</label>
+                    `;
+                    timeSlotsContainer.appendChild(div);
+                }
+            }
+        }
+
+        // Event listener for salon selection
+        document.getElementById('salonSelect').addEventListener('change', function() {
+            const selectedSalon = this.value;
+            generateTimeSlots(selectedSalon); // Generate time slots based on selected salon
+        });
+
+        // Initial call to generate time slots for the default selected salon
+        generateTimeSlots(document.getElementById('salonSelect').value);
+    </script>
 </body>
 </html>

@@ -680,20 +680,25 @@ color: #FFD700;}
 
 .calendar-container {
     display: flex;
-    justify-content: space-around;
+    justify-content: space-evenly;
     align-items: center;
     flex-direction: row; /* Align elements vertically */
     margin-bottom: 20px;
 
 }
 
-.calendar-header {
+.calendar-headerjs {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    width: 300px; /* Fixed width for the calendar header */
+    width: 800px; /* Fixed width for the calendar header */
 
 
+}
+
+.calendar-time {
+    flex-direction: row;
+    justify-content: flex-start;
 }
 
 #timeSlots{
@@ -701,6 +706,11 @@ color: #FFD700;}
     margin-top: 4rem;
     color: white;
     font-size: 20px;
+}
+
+.timeSlot-occupied{
+    color: red;
+    text-decoration: line-through;
 }
 
 #calendar {

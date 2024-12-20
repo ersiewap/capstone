@@ -71,31 +71,37 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin']!== true) {
 <!-- Password -->
 <div class="password"> 
     <div class="text5">
-    Password
+        Password
     </div>
     <div class="box5">
         <?php
-            $password = $_SESSION['ownerpass']; // retrieve the password from the session
-            $password_length = strlen($password);
-            $asterisks = str_repeat('*', $password_length);
-            echo $asterisks;
+            // Check if the password length is set in the session
+            if (isset($_SESSION['password_length'])) {
+                $password_length = $_SESSION['password_length'];
+                $asterisks = str_repeat('*', $password_length);
+                echo $asterisks; // Display the password as asterisks
+            } else {
+                echo "Password not set"; // Handle the case where the password length is not available
+            }
         ?>
     </div>
-    <input type="hidden" id="actual_password" value="<?php echo $password; ?>" />
+    <input type="hidden" id="actual_password" value="<?php echo isset($_SESSION['ownerpass']) ? htmlspecialchars($_SESSION['ownerpass']) : ''; ?>" />
     <a id="activateButton2" class="activateButton">Change Password</a>
 
     <form id="targetElement2" class="target" action="change_password.php" method="post">
-    <div class="inputs">Input Current Password</div>
-    <input type="password" name="current_password" style="margin-top: 5px; background-color: #FFE7E7;width: 400px; height: 40px; border: 1px solid #ccc; border-radius: 5px;">
+        <div class="inputs">Input Current Password</div>
+        <input type="password" name="current_password" style="margin-top: 5px; background-color: #FFE7E7;width: 400px; height: 40px; border: 1px solid #ccc; border-radius: 5px;">
 
-    <div class="inputs">Input New Password</div>
-    <input type="password" name="new_password" style="margin-top: 5px; background-color: #FFE7E7;width: 400px; height: 40px; border: 1px solid #ccc; border-radius: 5px;">
+        <div class="inputs">Input New Password</div>
+        <input type="password" name="new_password" style="margin-top: 5px; background-color: #FFE7E7;width: 400px; height: 40px; border: 1px solid #ccc; border-radius: 5 ```php
+px;">
 
-    <div class="inputs">Confirm New Password</div>
-    <input type="password" name="confirm_new_password" style="margin-top: 5px; background-color: #FFE7E7;width: 400px; height: 40px; border: 1px solid #ccc; border-radius: 5px;">
+        <div class="inputs">Confirm New Password</div>
+        <input type="password" name="confirm_new_password" style="margin-top: 5px; background-color: #FFE7E7;width: 400px; height: 40px; border: 1px solid #ccc; border-radius: 5px;">
 
-    <input type="submit" value="Update" style="margin-top: 10px; background-color:#602147; color:white; font-family:'Sniglet'; height:40px; border: transparent; border-radius: 5px;"></input>
-</form>
+        <input type="submit" value="Update" style="margin-top: 10px; background-color:#602147; color:white; font-family:'Sniglet'; height:40px; border: transparent; border-radius: 5px;"></input>
+    </form>
+</div>
 
 <script>
     function toggleActiveClass(buttonId, targetId) {

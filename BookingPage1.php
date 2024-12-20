@@ -7,7 +7,20 @@
         <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&display=swap" rel="stylesheet">
         <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
         <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="BookingPage1.css">
+        <link rel="stylesheet" href="BookingPage1.css">
+        
+        <!-- calendarjs -->
+        <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
+        <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/bootstrap5@6.1.15/index.global.min.js"></script>
+        <style>
+            #calendar {
+                /* max-width: 600px; */
+                margin: 40px auto; 
+                background-color: #f9f9f9; /* Light gray background */
+                border: 1px solid #ccc;   /* Optional border */
+                border-radius: 8px;       /* Optional rounded corners */
+            }
+        </style>
     </head>
     <?php
     session_start();
@@ -33,30 +46,32 @@
     // Retrieve the ownerID of the currently logged-in user
     $ownerID = $_SESSION['ownerID'];
     
+    $pets = array();
     $stmt = $conn->prepare("SELECT petid, petname FROM petinfo WHERE ownerID = ?");
     $stmt->bind_param("i", $ownerID);
     $stmt->execute();
     $result = $stmt->get_result();
-    
-    // Create an array to store the pet information
-    $pets = array();
-    
-    
     while ($row = $result->fetch_assoc()) {
         $pets[] = array('petid' => $row['petid'], 'petname' => $row['petname']);
     }
     
     
+    $salons = array();
     $stmt = $conn->prepare("SELECT salonid, shopname FROM salon");
     $stmt->execute();
     $result = $stmt->get_result();
-    
-    // Create an array to store the pet information
-    $salons = array();
-    
-    
     while ($row = $result->fetch_assoc()) {
         $salons[] = array('salonid' => $row['salonid'], 'shopname' => $row['shopname']);
+    }
+    
+    $services = [];
+    $stmt = $conn->prepare("SELECT serviceid, servicename, price FROM services ");
+    $stmt->execute();
+    $result = $stmt->get_result();
+    while ($row = $result->fetch_assoc()) {
+        $services[] = array('serviceid' => $row['serviceid'], 
+                            'servicename' => $row['servicename'],
+                            'price' => $row["price"]);
     }
     
     ?>
@@ -123,36 +138,34 @@
                 <div id="salon_select0">
                     <select class="salon_select" id="salon_select">
                     <?php foreach ($salons as $salon) { ?>
-                        <option value="<?php echo $salon['salonid']; ?>"><?php echo $salon['shopname']; ?></option>
+                        <option value="<?php echo $salon['salonid']; ?>" >
+                            <?php echo $salon['shopname']; ?>
+                        </option>
                     <?php } ?>
                     </select>
                 </div>
             
                 <div class="booking_items">Pick a Service</div>
                 <div id="id_pick_service">
-                <?php foreach ($services[$selectedSalon] as $service) { ?>
-                    <label>
-                        <input type="checkbox" name="serviceid[]" value="<?php echo $service['value']; ?>">
-                        <?php echo $service['text']; ?>
-                    </label><br>
+                <?php 
+                foreach ($services as $service) { ?>
+                    <label><input type="checkbox" class="service_checkbox" name="serviceid[]" value="<?php echo $service['serviceid']; ?>" data-amount="<?php echo $service['price']; ?>">
+                    <span><?php echo $service['servicename']; ?> (₱<?php echo number_format($service['price'],2); ?>)</span></label>
+                    <br>
+                    
                 <?php } ?>
-                </div>
+                </div>    
+                
 
                     <hr class="line2"></hr>
 
-            <div class="calendar-container">
-                <div class="calendar-header">
-                    <span id="prevMonth">
-                        <i class="fas fa-chevron-left"></i>
-                    </span>
-                    <div id="calendar"></div>
-                    <span id="nextMonth">
-                        <i class="fas fa-chevron-right"></i>
-                    </span>
-                </div>
-                <div class="slots" id="timeSlots2"><?php include ("timeSlots2.php")?>;</div>
-            </div>
-
+            
+                <div class="calendar-container">   
+                    <div class="calendar-headerjs"> 
+                        <div id="calendar"></div>    
+                    </div>    
+                    <div class="slots calendar-time" id="timeSlots2"><?php include ("timeSlots2.php")?>;</div>
+                </div>    
 
                 <hr class="line3"></hr>
                 <div class="booking_items">Payment Method</div>
@@ -170,7 +183,7 @@
             </div>
                 </div>
             
-                <a ><button class=" button_next">Next</button></a>
+                <a><button class="button_next">Next</button></a>
                 <!-- Modal Structure -->
                 <div id="popupModal" class="modal">
                     <div class="modal-content">
@@ -178,11 +191,111 @@
                         <p>Please complete all details to proceed.</p>
                     </div>
                 </div>
-
+            </form>            
         </section>
 
         <script>
-        
+            
+            document.addEventListener('DOMContentLoaded', function () {
+                const salonSelect = document.getElementById('salon_select');
+                const serviceSelect = document.getElementById('id_pick_service');
+                const serviceForm = document.getElementById('id_pick_service');
+                const serviceCheckbox = document.querySelectorAll('.service_checkbox');
+                const totalAmount = document.getElementById('total');
+
+                
+                
+                //select chain of salon to service
+                salonSelect.addEventListener('change', function () {
+                    const salonId = this.value;
+                
+                    serviceSelect.innerHTML = '';
+                    serviceSelect.disabled = true;
+                    if (salonId) {
+                        fetch(`ajax/services.php?salon_id=${salonId}`)
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error('Network response was not ok');
+                                }
+                                return response.json();
+                            })
+                            .then(data => {
+                                let options = '';
+                                data.forEach(services => {
+                                    options += `<label><input type="checkbox" class="service_checkbox" name="serviceid[]" value="${services.serviceid}" data-amount="${services.price}" onchange="updateTotal"><span>${services.servicename} (₱${services.price}.00)</span></label>`;
+                                });
+                                
+                                serviceSelect.innerHTML = options;
+                                serviceSelect.disabled = false;
+                                
+                                totalAmount.textContent = "0.00"; //reset total to zero every change of salon
+                                
+                                //reselect all dynamically created checkboxes
+                                const serviceCheckCreated = document.querySelectorAll('.service_checkbox');
+                                serviceCheckCreated.forEach(checkbox => {
+                                    checkbox.addEventListener('change', updateTotal);
+                                });
+                            })
+                            .catch(error => {
+                                console.error('Error fetching subcategories:', error);
+                            });
+                    } else {
+                        
+                        serviceSelect.innerHTML = '<option value="">Select a subcategory</option>';
+                        serviceSelect.disabled = true;
+                    }
+                    serviceCheckbox.forEach(checkbox => {
+                        checkbox.addEventListener('change', updateTotal);
+                    });
+                });
+
+                /*
+                document.getElementById('salon_select').addEventListener('change', function() {
+                    const selectedSalon = this.value;
+                    const serviceForm = document.getElementById('id_pick_service');
+                    serviceForm.innerHTML = '';
+
+                    if (services[selectedSalon]) {
+                        services[selectedSalon].forEach(service => {
+                            const label = document.createElement('label');
+                            const input = document.createElement('input');
+                            const span = document.createElement('span');
+
+                            input.type = 'checkbox';
+                            input.name = 'services';
+                            input.value = service.value;
+                            span.textContent = service.text;
+
+                            label.appendChild(input);
+                            label.appendChild(span);
+                            serviceForm.appendChild(label);
+                        });
+                    }
+                });
+                */
+                
+
+                serviceCheckbox.forEach(checkbox => {
+                    checkbox.addEventListener('change', updateTotal);
+                });
+                
+                
+
+            });                
+
+            updateTotal = () => {
+                const serviceCheckbox = document.querySelectorAll('.service_checkbox');
+                const totalAmount = document.getElementById('total');
+                
+                let total = 0;
+                serviceCheckbox.forEach(checkbox => {
+                    if (checkbox.checked) {
+                        total += parseFloat(checkbox.dataset.amount);
+                    }
+                });
+                totalAmount.textContent = total.toFixed(2);
+            };
+
         fetch('/capstone/get-booked-dates.php')
             .then(response => response.json())
             .then(data => {
@@ -195,82 +308,9 @@
             .catch(error => console.error('Error fetching booked dates:', error));
 
 
-document.getElementById('salon_select').addEventListener('change', function() {
-    const selectedSalon = this.value;
-    const serviceForm = document.getElementById('id_pick_service');
-    serviceForm.innerHTML = '';
 
-    if (services[selectedSalon]) {
-        services[selectedSalon].forEach(service => {
-            const label = document.createElement('label');
-            const input = document.createElement('input');
-            const span = document.createElement('span');
-
-            input.type = 'checkbox';
-            input.name = 'services';
-            input.value = service.value;
-            span.textContent = service.text;
-
-            label.appendChild(input);
-            label.appendChild(span);
-            serviceForm.appendChild(label);
-        });
-    }
-});
-
-
-
-        let total = 0;
-        const selectedServices = new Set(); // To keep track of selected services
-        let selectedcontainer = []; // To store selected services
-
-        // Function to update the total amount
-        function updateTotal(amount, button) {
-            if (selectedServices.has(button.innerText)) {
-                // If already selected, remove the amount
-                total -= amount;
-                selectedServices.delete(button.innerText);
-                selectedcontainer = selectedcontainer.filter(service => service !== button.innerText);
-                button.classList.remove('button_selected'); // Remove selected style
-            } else {
-                // If not selected, add the amount
-                total += amount;
-                selectedServices.add(button.innerText);
-                selectedcontainer.push(button.innerText);
-                button.classList.add('button_selected'); // Add selected style
-            }
-            document.getElementById("total").innerText = "Total Amount: ₱ " + total.toFixed(2);
-        }
-
-        // Event listener for the dropdown to select the service category
-        document.addEventListener('DOMContentLoaded', function() {
-            const salonSelect = document.getElementById('salon_select');
-            const serviceForm = document.getElementById('id_pick_service');
-
-            salonSelect.addEventListener('change', function() {
-                const selectedSalon = this.value;
-                serviceForm.innerHTML = ''; // Clear previous services
-
-                if (services[selectedSalon]) {
-                    services[selectedSalon].forEach(service => {
-                        // Create a button for each service
-                        const button = document.createElement('button');
-                        // console.log("kahit ano ",service )
-                        button.innerText = `${service.text} (₱${service.amount}.00)`;
-                        button.type = 'button'; // Set button type to avoid default form behavior
-                        button.onclick = (e) => {
-                            e.preventDefault(); // Prevent form submission
-                            updateTotal(service.amount, button); // Update total and toggle button
-                        };
-                        serviceForm.appendChild(button);
-                        serviceForm.appendChild(document.createElement('br')); // Add line break
-                    });
-                }
-            });
-        });
-    // Trigger change event to load default services
-    document.getElementById('salon_select').dispatchEvent(new Event('change'));
-
+        
+    
 const modal = document.getElementById("popupModal");
 const closeModal = document.getElementsByClassName("close")[0];
 
@@ -334,9 +374,12 @@ document.querySelector('.button_next').addEventListener('click', function(event)
 
             // Call the function when the page loads
             window.onload = setMinDate;
+
+            
         </script>
 
 
-        <script src="Date.js"></script>
+        <!-- <script src="Date.js"></script> -->
+        <script src="assets/js/calendarGrid.js"></script> 
     </body>
     </html>
