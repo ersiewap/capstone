@@ -36,10 +36,10 @@ if ($conn->connect_error) {
 $selectedPet = $_POST['pet_id'] ?? '';
 $selectedSalon = $_POST['salon_id'] ?? '';
 $selectedDate = $_POST['selected_date'] ?? '';
-$selectedTime = $_POST['meeting_time'] ?? ''; // Retrieve the selected time
+$selectedTime = $_POST['timeSlot'] ?? ''; // Retrieve the selected time
 $selectedPayment = $_POST['payment_method'] ?? '';
 $userservices = isset($_POST['serviceid']) ? $_POST['serviceid'] : [];
-
+    
 // Initialize total amount
 $totalAmount = 0;
 

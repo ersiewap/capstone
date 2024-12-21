@@ -172,7 +172,7 @@
                         <input type="hidden" id="selectedDate" name="selected_date">    
                     </div>    
                     
-                    <div class="slots calendar-time" id="timeSlots2" name="meeting_time"><?php include ("timeSlots2.php")?>;</div>
+                    <div class="slots calendar-time" id="timeSlots2"><?php include ("timeSlots2.php")?>;</div>
                 </div>    
 
                 <hr class="line3"></hr>
