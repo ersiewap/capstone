@@ -19,6 +19,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
     header('refresh:2; url=sample.php');
     exit;
 }
+$userId = $_SESSION['ownerID']; // Ensure this is set when the user logs in
 
 $servername = "localhost";
 $username = "root";
@@ -33,13 +34,13 @@ if ($conn->connect_error) {
 }
 
 // Get values from POST parameters
-$selectedPet = $_POST['pet_id'] ?? '';
-$selectedSalon = $_POST['salon_id'] ?? '';
+$selectedPet = $_POST['pet_id'] ?? ''; // Ensure this is correctly set in your form
+$selectedSalon = $_POST['salon_id'] ?? ''; // Ensure this is correctly set in your form
 $selectedDate = $_POST['selected_date'] ?? '';
 $selectedTime = $_POST['timeSlot'] ?? ''; // Retrieve the selected time
 $selectedPayment = $_POST['payment_method'] ?? '';
 $userservices = isset($_POST['serviceid']) ? $_POST['serviceid'] : [];
-    
+
 // Initialize total amount
 $totalAmount = 0;
 
@@ -59,7 +60,10 @@ $salons = array(
     array('salonid' => 3, 'shopname' => 'Kanjis Pet Grooming Services'),
 );
 
+// Initialize $salonName
 $salonName = '';
+
+// Find the selected salon name
 foreach ($salons as $salon) {
     if ($salon['salonid'] == $selectedSalon) {
         $salonName = $salon['shopname'];
@@ -67,21 +71,37 @@ foreach ($salons as $salon) {
     }
 }
 
+// Initialize service names
 $serviceNames = [];
+
+// Calculate total amount and prepare service IDs
+$serviceIds = [];
 if (!empty($userservices) && is_array($userservices)) {
-    $serviceIds = implode(',', array_map('intval', $userservices));
-    $sql = "SELECT servicename, price FROM services WHERE serviceid IN ($serviceIds)";
+    $serviceIds = array_map('intval', $userservices); // Ensure service IDs are integers
+    $serviceIdsString = implode(',', $serviceIds); // Create a comma-separated string of service IDs
+
+    // Fetch prices and names for the selected services
+    $sql = "SELECT servicename, price FROM services WHERE serviceid IN ($serviceIdsString)";
     $result = $conn->query($sql);
 
     if ($result->num_rows > 0) {
         while ($row = $result->fetch_assoc()) {
-            $serviceNames[] = htmlspecialchars($row['servicename']);
+            $serviceNames[] = htmlspecialchars($row['servicename']); // Collect service names
             $totalAmount += (float)$row['price']; // Add to total amount
         }
     }
 }
-$serviceNames = implode(', ', $serviceNames);
 
+// Convert service names array to a string for display
+$serviceNamesString = implode(', ', $serviceNames);
+
+// Insert data into the book table, including the status column
+$status = 0; // Set status to 0 for new bookings
+$stmt = $conn->prepare("INSERT INTO book (ownerID, petid, salonid, date, time, paymentmethod, serviceid, paymentprice, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+$stmt->bind_param("iiisssssd", $userId, $selectedPet, $selectedSalon, $selectedDate, $selectedTime, $selectedPayment, $serviceIdsString, $totalAmount, $status);
+
+$stmt->execute(); // Execute the insert statement
+$stmt->close();
 $conn->close();
 ?>
 
@@ -96,7 +116,7 @@ $conn->close();
     <div class="box">
         <div class="contents">Service</div>
         <div class="services1">
-            <div class="contents1_service"><?php echo $serviceNames; ?></div>
+            <div class="contents1_service"><?php echo $serviceNamesString; ?></div>
         </div>
         
         <hr class="line1">
