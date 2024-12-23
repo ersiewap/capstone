@@ -44,6 +44,22 @@ $userservices = isset($_POST['serviceid']) ? $_POST['serviceid'] : [];
 // Initialize total amount
 $totalAmount = 0;
 
+// Check for duplicate bookings
+$checkDuplicateSql = "SELECT * FROM book WHERE date = ? AND time = ? AND salonid = ?";
+$checkStmt = $conn->prepare($checkDuplicateSql);
+$checkStmt->bind_param("ssi", $selectedDate, $selectedTime, $selectedSalon);
+$checkStmt->execute();
+$duplicateResult = $checkStmt->get_result();
+
+if ($duplicateResult->num_rows > 0) {
+    echo "<script>alert('Duplicate entry: There is already a booking for this date and time.'); window.location.href='BookingPage1.php';</script>";
+    $checkStmt->close();
+    $conn->close();
+    exit; // Stop further execution
+}
+
+$checkStmt->close();
+
 // Fetch pet name
 $stmt = $conn->prepare("SELECT petname FROM petinfo WHERE petid = ?");
 $stmt->bind_param("i", $selectedPet);
@@ -53,15 +69,15 @@ $row = $result->fetch_assoc();
 $petname = $row['petname'] ?? 'Unknown Pet';
 $stmt->close();
 
+// Initialize salon name
+$salonName = '';
+
 // Define the $salons array
 $salons = array(
     array('salonid' => 1, 'shopname' => 'Vetter Health Animal Clinic and Livestock Consultancy'),
     array('salonid' => 2, 'shopname' => 'Davids Pet Grooming Salon'),
     array('salonid' => 3, 'shopname' => 'Kanjis Pet Grooming Services'),
 );
-
-// Initialize $salonName
-$salonName = '';
 
 // Find the selected salon name
 foreach ($salons as $salon) {
