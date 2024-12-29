@@ -117,7 +117,7 @@ mysqli_close($conn);
      <div class="navbar">
         <a href="HomeNew.php" ><i class="fa-solid fa-house"></i><br>Home</a>
         <a href="LocationNew.php"><i class="fa-solid fa-location-dot"></i><br>Location</a>
-        <a href="book.php"><i class="fa-solid fa-plus"> </i> <br>Book</a>
+        <a href="BookingPage1.php"><i class="fa-solid fa-plus"> </i> <br>Book</a>
         <a href="addpetnew.php"><i class="fa-solid fa-paw"> </i><br>Pets</a>
         <a href="Serv.php"><i class="fa-solid fa-briefcase"></i> </i><br>Services</a>
         <a href="YourProfile.php"><i class="fa-solid fa-user"></i><br>Profile</a>
@@ -141,7 +141,7 @@ mysqli_close($conn);
                 <li><a href="HomeNew.php">Home</a></li>
                 <li><a href="Serv.php">Services</a></li>
                 <li><a href="LocationNew.php">Location</a></li>
-                <li class="book_button"><a href="book.php"><button>BOOK NOW!</button></a></li>
+                <li class="book_button"><a href="BookingPage1.php"><button>BOOK NOW!</button></a></li>
                 <li class="dropdown">
                     <a href="#"><i class="fa-solid fa-user circle-icon"></i></a>
                     <div class="dropdown-content">

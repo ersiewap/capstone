@@ -1,5 +1,10 @@
 <?php
 session_start();
+if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
+    echo "<script>alert('You need to log in to view this page.');</script>";
+    header('refresh:2; url=login_staff.php');
+    exit;
+}
 
 // Database connection details
 $servername = "localhost";

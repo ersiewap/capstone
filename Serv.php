@@ -1,4 +1,12 @@
 <?php
+    session_start();
+    if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin']!== true) {
+        
+        echo "<script>alert('You need to log in to view this page.');</script>";
+        header('refresh:2; url=sample.php');
+        exit;
+    }
+
 // Database connection
 $servername = "localhost";
 $username = "root";  // Use your database username
