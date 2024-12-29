@@ -13,13 +13,23 @@
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <?php
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+require 'phpmailer/src/Exception.php';
+require 'phpmailer/src/PHPMailer.php';
+require 'phpmailer/src/SMTP.php';
+
 session_start();
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
     echo "<script>alert('You need to log in to view this page.');</script>";
     header('refresh:2; url=sample.php');
     exit;
 }
+
 $userId = $_SESSION['ownerID']; // Ensure this is set when the user logs in
+$userEmail = $_SESSION['owneremail'] ?? 'default@example.com'; // User's email from session
 
 $servername = "localhost";
 $username = "root";
@@ -87,7 +97,7 @@ $salons = array(
 
 // Find the selected salon name
 foreach ($salons as $salon) {
-    if ($salon['salonid'] == $selectedSalon) {
+    if ($salon['salonid'] == $selectedSalon) { // Corrected line
         $salonName = $salon['shopname'];
         break;
     }
@@ -98,7 +108,7 @@ $serviceNames = [];
 
 // Calculate total amount and prepare service IDs
 $serviceIds = [];
-if (!empty($userservices) && is_array ($userservices)) {
+if (!empty($userservices) && is_array($userservices)) {
     $serviceIds = array_map('intval', $userservices); // Ensure service IDs are integers
     $serviceIdsString = implode(',', $serviceIds); // Create a comma-separated string of service IDs
 } else {
@@ -126,70 +136,113 @@ $status = 0; // Set status to 0 for new bookings
 $stmt = $conn->prepare("INSERT INTO book (ownerID, petid, salonid, date, time, paymentmethod, serviceid, paymentprice, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
 $stmt->bind_param("iiisssssd", $userId, $selectedPet, $selectedSalon, $selectedDate, $selectedTime, $selectedPayment, $serviceIdsString, $totalAmount, $status);
 
-$stmt->execute(); // Execute the insert statement
-$stmt->close();
-$conn->close();
+if ($stmt->execute()) { // Execute the insert statement
+    // Booking was successful, now prepare to send the email
+    $stmt->close();
+    $conn->close();
+
+    // Prepare email details
+    $email = $userEmail; // Use the logged-in user's email
+    $subject = "Booking Confirmation";
+    $message = "
+        Service: $serviceNamesString,
+        Date: " . htmlspecialchars($selectedDate) . ",
+        Time: " . htmlspecialchars($selectedTime) . ",
+        Pet: " . htmlspecialchars($petname) . ",
+        Pet Salon: " . htmlspecialchars($salonName) . ",
+        Payment Method: " . htmlspecialchars($selectedPayment) . ",
+        Total Fee: " . number_format($totalAmount, 2) . "
+    ";
+
+    // Store email details in session to send after confirmation
+    $_SESSION['emailDetails'] = [
+        'email' => $email,
+        'subject' => $subject,
+        'message' => $message
+    ];
+
+    // Redirect to a confirmation page or show a confirmation message
+    header('Location: confirmation.php'); // Redirect to a confirmation page
+    exit;
+} else {
+    echo "Error: Could not execute the booking.";
+    $stmt->close();
+    $conn->close();
+}
 ?>
 
 <body>
-    <div class="nav">
-        <div>
-            <a href="BookingPage1.php"><i class="fa-solid fa-arrow-left arrow_left"></i></a>
-            Booking Summary
-        </div>
-    </div>
-    <!-- content -->
-    <div class="box">
-        <div class="contents">Service</div>
-        <div class="services1">
-            <div class="contents1_service"><?php echo $serviceNamesString; ?></div>
-        </div>
-        
-        <hr class="line1">
-        <div class="container_date_time">
-            <div class="date_div">
-                <div class="contents">Date</div>
-                <div class="contents1_date"><?php echo htmlspecialchars($selectedDate); ?></div>
-            </div>
-            <div class="time_div">
-                <div class="contents">Time</div>
-                <div class="contents1_time"><?php echo htmlspecialchars($selectedTime); ?></div>
+    <form id="bookingForm" action="" method="post">
+        <input type="hidden" name="email" value="<?php echo $userEmail; ?>">
+        <input type="hidden" name="subject" value="Booking Confirmation">
+        <input type="hidden" name="message" value="
+            Service: <?php echo $serviceNamesString; ?>,
+            Date: <?php echo htmlspecialchars($selectedDate); ?>,
+            Time: <?php echo htmlspecialchars($selectedTime); ?>,
+            Pet: <?php echo htmlspecialchars($petname); ?>,
+            Pet Salon: <?php echo htmlspecialchars($salonName); ?>,
+            Payment Method: <?php echo htmlspecialchars($selectedPayment); ?>,
+            Total Fee: <?php echo number_format($totalAmount, 2); ?>
+        ">
+        <div class="nav">
+            <div>
+                <a href="BookingPage1.php"><i class="fa-solid fa-arrow-left arrow_left"></i></a>
+                Booking Summary
             </div>
         </div>
-        
-        <hr class="line1">
-        
-        <div class="contents">Pet</div>
-        <div class="contents1_pet"><?php echo htmlspecialchars($petname); ?></div>
-        <hr class="line1">
-        <div class="contents">Pet Salon</div>
-        <div class="contents1_salon"><?php echo htmlspecialchars($salonName); ?></div>
-        <hr class="line1">
-        <div class="contents">Payment Method</div>
-        <div class="contents1_payment"><?php echo htmlspecialchars($selectedPayment); ?></div>
-        
-        <hr class="line1">
-        <div class="contents">Total Fee</div>
-        <div class="contents1_fee"><?php echo number_format($totalAmount, 2); ?></div>
+        <!-- content -->
+        <div class="box">
+            <div class="contents">Service</div>
+            <div class="services1">
+                <div class="contents1_service"><?php echo $serviceNamesString; ?></div>
+            </div>
+            
+            <hr class="line1">
+            <div class="container_date_time">
+                <div class="date_div">
+                    <div class="contents">Date</div>
+                    <div class="contents1_date"><?php echo htmlspecialchars($selectedDate); ?></div>
+                </div>
+                <div class="time_div">
+                    <div class="contents">Time</div>
+                    <div class="contents1_time"><?php echo htmlspecialchars($selectedTime); ?></div>
+                </div>
+            </div>
+            
+            <hr class="line1">
+            
+            <div class="contents">Pet</div>
+            <div class="contents1_pet"><?php echo htmlspecialchars($petname); ?></div>
+            <hr class="line1">
+            <div class="contents">Pet Salon</div>
+            <div class="contents1_salon"><?php echo htmlspecialchars($salonName); ?></div>
+            <hr class="line1">
+            <div class="contents">Payment Method</div>
+            <div class="contents1_payment"><?php echo htmlspecialchars($selectedPayment); ?></div>
+            
+            <hr class="line1">
+            <div class="contents">Total Fee</div>
+            <div class="contents1_fee"><?php echo number_format($totalAmount, 2); ?></div>
 
-    </div>
+        </div>
 
-    <a class="cd-popup-trigger book_button">Book</a>
-    <div class="cd-popup" role="alert">
-        <div class="cd-popup-container">
-            <i id="initial-icon" class="fa-solid fa-calendar-check"></i>
-            <p class="popup-text">Are you sure you want to book an appointment?</p>
-            <div id="confirmation-section" style="display: none;">
-                <i class="fa-solid fa-circle-check"></i>
-                <p class="confirmation-text">Booking Successful!</p>
-            </div>
-            <ul class="cd-buttons">
-                <li><a href="#0" class="yes-button" onclick="confirmBooking()">Book</a></li>
-                <li><a href="#0" class="no-button">Cancel</a></li>
-            </ul>
-            <a href="#0" class="cd-popup-close img-replace">Close</a>
-        </div> <!-- cd-popup-container -->
-    </div> <!-- cd-popup -->
+        <a class="cd-popup-trigger book_button">Book</a>
+        <div class="cd-popup" role="alert">
+            <div class="cd-popup-container">
+                <i id="initial-icon" class="fa-solid fa-calendar-check"></i>
+                <p class="popup-text">Are you sure you want to book an appointment?</p>
+                <div id="confirmation-section" style="display: none;">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <p class="confirmation-text">Booking Successful!</p>
+                </div>
+                <ul class="cd-buttons">
+                    <li><button type="submit" name="send" class="yes-button" onclick="confirmBooking()">Book</button></li>
+                    <li><a href="#0" class="no-button">Cancel</a></li>
+                </ul>
+                <a href="#0" class="cd-popup-close img-replace">Close</a>
+            </div> <!-- cd-popup-container -->
+        </div> <!-- cd-popup -->
+    </form>
     
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
 <script>
@@ -221,6 +274,7 @@ $conn->close();
             $('.popup-text').hide();
             $('.confirmation-text').show();
             $('.cd-buttons').hide();
+            confirmBooking();
         });
         
         $('.no-button').on('click', function(event){
@@ -235,6 +289,11 @@ $conn->close();
         document.getElementById('initial-icon').style.display = 'none';
         // Show the confirmation section
         document.getElementById('confirmation-section').style.display = 'block';
+
+        // Submit the form after a short delay to show the confirmation message
+        setTimeout(function() {
+            document.getElementById('bookingForm').submit();
+        }, 2000); // Adjust the delay as needed
     }
 </script>
 

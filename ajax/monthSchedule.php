@@ -21,13 +21,19 @@ $stmt = $conn->prepare($sql);
 $stmt->execute();
 $result = $stmt->get_result();
 
+$array = [
+    1 => 9,
+    2 => 9,
+    3 => 10
+];
+
 // Update the schedules with booking information
 while ($row = $result->fetch_assoc()) {
     $date = $row['date'];
     $bookingCount = $row['booking_count'];
     
     // Mark as 'Full' if there are 4 bookings, otherwise 'Available'
-    if ($bookingCount >= 4) {
+    if ($bookingCount >= $array[$salon_id]) {
         $schedules[$date]['status'] = 'full';
     } else {
         $schedules[$date]['status'] = 'available';

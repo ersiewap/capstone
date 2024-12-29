@@ -1,4 +1,30 @@
-<?php 
+<?php
+session_start();
+
+// Assuming the user's email is stored in the session when they log in
+$userEmail = $_SESSION['owneremail'] ?? 'default@example.com'; // Replace with actual session variable
+
+// ... (rest of your existing code)
+
+// After inserting the booking into the database
+$stmt->execute(); // Execute the insert statement
+$stmt->close();
+$conn->close();
+
+// Prepare email details
+$email = $userEmail; // Use the logged-in user's email
+$subject = "Booking Confirmation";
+$message = "
+    Service: $serviceNamesString,
+    Date: " . htmlspecialchars($selectedDate) . ",
+    Time: " . htmlspecialchars($selectedTime) . ",
+    Pet: " . htmlspecialchars($petname) . ",
+    Pet Salon: " . htmlspecialchars($salonName) . ",
+    Payment Method: " . htmlspecialchars($selectedPayment) . ",
+    Total Fee: " . number_format($totalAmount, 2) . "
+";
+
+// Send email
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
@@ -6,59 +32,37 @@ require 'phpmailer/src/Exception.php';
 require 'phpmailer/src/PHPMailer.php';
 require 'phpmailer/src/SMTP.php';
 
-if (isset($_POST["book"])) {
-    // Get booking details from the form
-    $name = $_POST["name"];
-    $email = $_POST["email"];
-    $booking_date = $_POST["booking_date"];
-    $message = $_POST["message"];
+$mail = new PHPMailer(true);
 
-    // Create the email content
-    $email_subject = "Booking Confirmation for " . $name;
-    $email_body = "
-        <h2>Booking Details</h2>
-        <p><strong>Name:</strong> $name</p>
-        <p><strong>Email:</strong> $email</p>
-        <p><strong>Booking Date:</strong> $booking_date</p>
-        <p><strong>Message:</strong> $message</p>
-        <p>Thank you for booking with us!</p>
+try {
+    $mail->isSMTP();
+    $mail->Host = 'smtp.gmail.com';
+    $mail->SMTPAuth = true;
+    $mail->Username = 'markgfrancis.05@gmail.com'; // Gmail address 
+    $mail->Password = 'uxutpnamcijdprru'; // Use environment variables for security
+    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // Use STARTTLS
+    $mail->Port = 587; // Use port 587 for STARTTLS
+
+    // Recipients
+    $mail->setFrom('markgfrancis.05@gmail.com'); // Gmail address
+    $mail->addAddress($email); // Send to the logged-in user's email
+
+    // Content
+    $mail->isHTML(true);
+    $mail->Subject = $subject;
+    $mail->Body = "
+    <p>Message</p>
+    <p>$message</p>
+    <p>Best regards,</p>
     ";
 
-    try {
-        // Send the email using PHPMailer
-        $mail = new PHPMailer(true);
-        
-        // Set mailer to use SMTP
-        $mail->isSMTP();
-        $mail->Host = 'smtp.gmail.com';  // Use your SMTP server if not Gmail
-        $mail->SMTPAuth = true;
-        $mail->Username = 'alyssasamson0105@gmail.com';  // Your Gmail username
-        $mail->Password = 'cpuuhsbjwnpfznzp';  // Your Gmail app password or regular password
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
-        $mail->Port = 465;
-
-        // Sender and recipient settings
-        $mail->setFrom('alyssasamson0105@gmail.com', 'Booking System');
-        $mail->addAddress($email);  // Recipient is the customer's email
-
-        // Email subject and body
-        $mail->Subject = $email_subject;
-        $mail->Body    = $email_body;
-        $mail->isHTML(true);
-
-        // Send email
-        $mail->send();
-
-        // Redirect with success message
-        echo "<script>
-                alert('Booking Confirmed! A confirmation email has been sent.');
-                window.location.href = 'index.php';
-            </script>";
-    } catch (Exception $e) {
-        echo "<script>
-                alert('Message could not be sent. Mailer Error: {$mail->ErrorInfo}');
-                window.location.href = 'index.php';
-            </script>";
+    // Send email
+    if ($mail->send()) {
+        echo "Message has been sent successfully";
+    } else {
+        echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
     }
+} catch (Exception $e) {
+    echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
 }
 ?>

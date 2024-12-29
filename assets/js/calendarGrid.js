@@ -30,12 +30,6 @@ document.addEventListener('DOMContentLoaded', function() {
       yesterday.setDate(today.getDate() - 1); // Get yesterday's date
 
       // Check if the event date is in the past or is yesterday
-      if (eventDate < today) {
-        info.el.style.backgroundColor = 'gray'; // Style for unavailable dates
-        info.el.style.border = '1px solid gray';
-        info.el.querySelector('.fc-event-title').innerText  = "Unavailable";
-        info.el.style.cursor = 'not-allowed';
-      } else {
         // Style for available dates (today and onwards)
         info.el.style.backgroundColor = 'green';
         info.el.style.border = '1px solid green';
@@ -48,7 +42,12 @@ document.addEventListener('DOMContentLoaded', function() {
           info.el.querySelector('.fc-event-title').innerText  = "Full";
           info.el.style.cursor = 'not-allowed';
         }
-      }
+        if (eventDate < today) {
+          info.el.style.backgroundColor = 'gray'; // Style for unavailable dates
+          info.el.style.border = '1px solid gray';
+          info.el.querySelector('.fc-event-title').innerText  = "Unavailable";
+          info.el.style.cursor = 'not-allowed';
+        }
     },
     dateClick: function (info) {
       // Triggered when a date is clicked
@@ -89,25 +88,28 @@ document.addEventListener('DOMContentLoaded', function() {
         yesterday.setDate(today.getDate() - 1); // Get yesterday's date
 
         // Check if the event date is in the past or is yesterday
-        if (eventDate < today) {
-          info.el.style.backgroundColor = 'gray'; // Style for unavailable dates
-          info.el.style.border = '1px solid gray';
-          info.el.querySelector('.fc-event-title').innerText  = "Unavailable";
-          info.el.style.cursor = 'not-allowed';
-        } else {
           // Style for available dates (today and onwards)
-          info.el.style.backgroundColor = 'green';
-          info.el.style.border = '1px solid green';
-          info.el.querySelector('.fc-event-title').innerText  = "Available";
-          
+          if (info.event.extendedProps && info.event.extendedProps.status === 'available') {
+            info.el.style.backgroundColor = 'green';
+            info.el.style.border = '1px solid green';
+            // info.el.query.querySelector('.fc-event-title').innerText  = "Full";
+            info.el.style.cursor = 'not-allowed';
+          }
           // Check if the event is marked as full
           if (info.event.extendedProps && info.event.extendedProps.status === 'full') {
             info.el.style.backgroundColor = 'red';
             info.el.style.border = '1px solid red';
-            info.el.query.querySelector('.fc-event-title').innerText  = "Full";
+            // info.el.query.querySelector('.fc-event-title').innerText  = "Full";
             info.el.style.cursor = 'not-allowed';
           }
-        }
+          if (eventDate < today) {
+            console.log(eventDate,"date unavailable");
+            info.el.style.backgroundColor = 'gray'; // Style for unavailable dates
+            info.el.style.border = '1px solid gray';
+            info.el.querySelector('.fc-event-title').innerText  = "Unavailable";
+            info.el.style.cursor = 'not-allowed';
+            console.log(info.el.querySelector('.fc-event-title').innerText)
+          } 
       },
       dateClick: function (info) {
         document.getElementById('selectedDate').value = info.dateStr;

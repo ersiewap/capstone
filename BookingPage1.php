@@ -79,7 +79,7 @@
     <body>
        <!-- Mobile Nav -->
 <div class="navbar">
-    <a href="Homepage.php" ><i class="fa-solid fa-house"></i><br>Home</a>
+    <a href="HomeNew.php" ><i class="fa-solid fa-house"></i><br>Home</a>
     <a href="LocationNew.php"><i class="fa-solid fa-location-dot"></i><br>Location</a>
     <a href="BookingPage1.php"><i class="fa-solid fa-plus"> </i> <br>Book</a>
     <a href="addpetnew.php"><i class="fa-solid fa-paw"> </i><br>Pets</a>
