@@ -289,21 +289,50 @@ function getPetDetails(petName) {
   xhr.send();
 }
 
-// Function to display pet details
+// Function to display pet details and appointment history
 function displayPetDetails(petDetails) {
-  const petImage = document.getElementById('petImage');
-  const petName = document.getElementById('petName');
-  const petBirthday = document.getElementById('petBirthday');
-  const petSex = document.getElementById('petSex');
-  const petSpecies = document.getElementById('petSpecies');
-  const petBreed = document.getElementById('petBreed');
+    const petImage = document.getElementById('petImage');
+    const petName = document.getElementById('petName');
+    const petBirthday = document.getElementById('petBirthday');
+    const petSex = document.getElementById('petSex');
+    const petSpecies = document.getElementById('petSpecies');
+    const petBreed = document.getElementById('petBreed');
+    const appointmentsTable = document.querySelector('.appointments_table');
 
-  petImage.src = petDetails.petphoto;
-  petName.textContent = petDetails.petname;
-  petBirthday.textContent = petDetails.petbirth;
-  petSex.textContent = petDetails.petgender;
-  petSpecies.textContent = petDetails.petspecies;
-  petBreed.textContent = petDetails.petbreed;
+    // Display pet details
+    petImage.src = petDetails.petphoto;
+    petName.textContent = petDetails.petname;
+    petBirthday.textContent = petDetails.petbirth;
+    petSex.textContent = petDetails.petgender;
+    petSpecies.textContent = petDetails.petspecies;
+    petBreed.textContent = petDetails.petbreed;
+
+    // Clear previous appointment history
+    appointmentsTable.innerHTML = `
+        <tr>
+            <th>Reference Number </th>
+            <th>Service</th>
+            <th>Date</th>
+            <th>Salon</th>
+            <th>Payment Method</th>
+            <th>Total Fee</th>
+            <th>Appointment Status</th>
+        </tr>
+    `;
+
+    // Display appointment history
+    petDetails.appointments.forEach(appointment => {
+        const row = appointmentsTable.insertRow();
+        row.innerHTML = `
+            <td>${appointment.bookid}</td>
+            <td>${appointment.servicename}</td>
+            <td>${appointment.date}</td>
+            <td>${appointment.salon_name || 'N/A'}</td> <!-- Display salon name -->
+            <td>${appointment.paymentmethod}</td>
+            <td>${appointment.paymentprice}</td>
+            <td>${appointment.appointment_status}</td> <!-- Display appointment status -->
+        `;
+    });
 }
 </script>
 

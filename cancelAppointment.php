@@ -23,8 +23,8 @@ if ($conn->connect_error) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $bookingID = $_POST['bookID']; // Get the booking ID from the AJAX request
 
-    // Update the booking status to cancelled
-    $sql = "UPDATE book SET is_cancelled = 1, status = 'Cancelled' WHERE bookid = ?";
+    // Update the booking status to cancelled and set the cancellation date
+    $sql = "UPDATE book SET is_cancelled = 1, status = 'Cancelled', cancel_date = NOW() WHERE bookid = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $bookingID);
     

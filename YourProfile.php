@@ -270,35 +270,42 @@ echo '</script>';
         }
 
         document.addEventListener("click", function(event) {
-            if (event.target.classList.contains("cancel_button")) {
-                const bookingID = event.target.getAttribute('data-booking-id');
+    if (event.target.classList.contains("cancel_button")) {
+        const bookingID = event.target.getAttribute('data-booking-id');
 
-                if (bookingID) {
-                    const confirmCancel = confirm("Are you sure you want to cancel the appointment?");
-                    
-                    if (confirmCancel) {
-                        fetch('cancelAppointment.php', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/x-www-form-urlencoded',
-                            },
-                            body: new URLSearchParams({
-                                'bookID': bookingID
-                            })
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                document.getElementById("statusText").textContent = "Cancelled";
-                                event.target.style.display = "none"; // Hide the cancel button
-                            } else {
-                                alert("Error cancelling appointment: " + data.error);
-                            }
-                        });
+        if (bookingID) {
+            const confirmCancel = confirm("Are you sure you want to cancel the appointment?");
+            
+            if (confirmCancel) {
+                fetch('cancelAppointment.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        'bookID': bookingID
+                    })
+                })
+                .then(response => {
+                    console.log('Response:', response); // Log the response
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Data:', data); // Log the data received
+                    if (data.success) {
+                        document.getElementById("statusText").textContent = "Cancelled";
+                        event.target.style.display = "none"; // Hide the cancel button
+                    } else {
+                        alert("Error cancelling appointment: " + data.error);
                     }
-                }
+                })
+                .catch(error => {
+                    console.error('Error:', error); // Log any errors
+                });
             }
-        });
+        }
+    }
+});
     </script>
 
     <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>

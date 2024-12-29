@@ -25,6 +25,33 @@ $result = $stmt->get_result();
 
 if ($result->num_rows > 0) {
     $petDetails = $result->fetch_assoc();
+    
+    // Retrieve appointment history for the selected pet
+    $petID = $petDetails['petid'];
+    $appointmentsStmt = $conn->prepare("SELECT b.bookid, b.serviceid, b.date, b.paymentmethod, b.paymentprice, 
+                                             CASE 
+                                                 WHEN b.is_cancelled = 1 AND b.status = 0 THEN 'Cancelled'
+                                                 WHEN b.is_cancelled = 0 AND b.status = 1 THEN 'Completed'
+                                                 WHEN b.is_cancelled = 0 AND b.status = 0 THEN 'Ongoing'
+                                                 ELSE 'Unknown'
+                                             END AS appointment_status,
+                                             s.servicename,
+                                             sa.shopname AS salon_name
+                                         FROM book b 
+                                         JOIN services s ON b.serviceid = s.serviceid 
+                                         JOIN salon sa ON b.salonid = sa.salonid 
+                                         WHERE b.petid = ?");
+    $appointmentsStmt->bind_param("i", $petID);
+    $appointmentsStmt->execute();
+    $appointmentsResult = $appointmentsStmt->get_result();
+
+    $appointments = array();
+    while ($appointment = $appointmentsResult->fetch_assoc()) {
+        $appointments[] = $appointment;
+    }
+
+    // Combine pet details and appointments
+    $petDetails['appointments'] = $appointments;
     echo json_encode($petDetails);
 } else {
     $error = array('error' => 'Pet not found');
