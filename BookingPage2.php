@@ -41,6 +41,12 @@ $selectedTime = $_POST['timeSlot'] ?? ''; // Retrieve the selected time
 $selectedPayment = $_POST['payment_method'] ?? '';
 $userservices = isset($_POST['serviceid']) ? $_POST['serviceid'] : [];
 
+// Validation: Check if all required fields are filled
+if (empty($selectedPet) || empty($selectedSalon) || empty($selectedDate) || empty($selectedTime) || empty($selectedPayment) || empty($userservices)) {
+    echo "<script>alert('Please complete the booking by selecting all required information.'); window.location.href='BookingPage1.php';</script>";
+    exit; // Stop further execution
+}
+
 // Initialize total amount
 $totalAmount = 0;
 
@@ -92,11 +98,15 @@ $serviceNames = [];
 
 // Calculate total amount and prepare service IDs
 $serviceIds = [];
-if (!empty($userservices) && is_array($userservices)) {
+if (!empty($userservices) && is_array ($userservices)) {
     $serviceIds = array_map('intval', $userservices); // Ensure service IDs are integers
     $serviceIdsString = implode(',', $serviceIds); // Create a comma-separated string of service IDs
+} else {
+    $serviceIdsString = NULL; // Set to NULL if no services are selected
+}
 
-    // Fetch prices and names for the selected services
+// Fetch prices and names for the selected services
+if ($serviceIdsString) {
     $sql = "SELECT servicename, price FROM services WHERE serviceid IN ($serviceIdsString)";
     $result = $conn->query($sql);
 
@@ -187,7 +197,7 @@ $conn->close();
         //open popup
         $('.cd-popup-trigger').on('click', function(event){
             event.preventDefault();
-            $('.cd-popup').addClass('is-visible');
+            $('.cd-popup ').addClass('is-visible');
         });
         
         //close popup

@@ -6,20 +6,29 @@ $username = "root";
 $password = "";
 $dbname = "capstone";
 
+$startDate = $_GET["date"];
+$salon_id = $_GET["salon_id"];
+$schedules = [];
 
-    $startDate = $_GET["date"];
-    $schedules = [];
-    $salon_id = $_GET["salon_id"];
-    
-    $conn = new mysqli($servername, $username, $password, $dbname);
-    $sql = "SELECT GROUP_CONCAT(DATE_FORMAT(book.time, '%H:%i')) 'time' FROM `book` WHERE book.date = '$startDate' AND salonid = '$salon_id'  ";
-    $stmt = $conn->prepare($sql);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    while ($row = $result->fetch_assoc()) {
-        $schedules[] = $row['time']; 
-        
-    }
-    echo json_encode($schedules);
-    exit;
+// Create a connection
+$conn = new mysqli($servername, $username, $password, $dbname);
 
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+// Query to get booked times for the selected date
+$sql = "SELECT GROUP_CONCAT(DATE_FORMAT(book.time, '%H:%i')) AS time FROM `book` WHERE book.date = ? AND salonid = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("si", $startDate, $salon_id); // Bind parameters
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($row = $result->fetch_assoc()) {
+    // Return the booked times as an array
+    $schedules = explode(',', $row['time']);
+}
+
+echo json_encode($schedules);
+exit;

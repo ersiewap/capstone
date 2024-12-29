@@ -23,18 +23,32 @@ document.addEventListener('DOMContentLoaded', function() {
     eventColor: 'transparent', 
     eventBackgroundColor: 'transparent',
     eventDidMount: function (info) {
-      
-      info.el.style.backgroundColor = 'green';
-      info.el.style.border = '1px solid green';
-      info.el.querySelector('.fc-event-title').innerText  = "Available";
-      if (info.event.extendedProps.status === 'full') {
-        info.el.style.backgroundColor = 'red';
-        info.el.style.border = '1px solid red';
-        info.el.querySelector('.fc-event-title').innerText  = "Full";
-        info.el.style.cursor = 'not-allowed';
-      } 
+      const eventDate = info.event.start; // Get the event date
+      const today = new Date(); // Get today's date
+      today.setHours(0, 0, 0, 0); // Set time to midnight for comparison
+      const yesterday = new Date(today);
+      yesterday.setDate(today.getDate() - 1); // Get yesterday's date
 
-      
+      // Check if the event date is in the past or is yesterday
+      if (eventDate < today) {
+        info.el.style.backgroundColor = 'gray'; // Style for unavailable dates
+        info.el.style.border = '1px solid gray';
+        info.el.querySelector('.fc-event-title').innerText  = "Unavailable";
+        info.el.style.cursor = 'not-allowed';
+      } else {
+        // Style for available dates (today and onwards)
+        info.el.style.backgroundColor = 'green';
+        info.el.style.border = '1px solid green';
+        info.el.querySelector('.fc-event-title').innerText  = "Available";
+        
+        // Check if the event is marked as full
+        if (info.event.extendedProps && info.event.extendedProps.status === 'full') {
+          info.el.style.backgroundColor = 'red';
+          info.el.style.border = '1px solid red';
+          info.el.querySelector('.fc-event-title').innerText  = "Full";
+          info.el.style.cursor = 'not-allowed';
+        }
+      }
     },
     dateClick: function (info) {
       // Triggered when a date is clicked
@@ -65,22 +79,35 @@ document.addEventListener('DOMContentLoaded', function() {
         }
        }
       ],
-      //post eventcall
       eventColor: 'transparent', 
       eventBackgroundColor: 'transparent',
       eventDidMount: function (info) {
-        
-        info.el.style.backgroundColor = 'green';
-        info.el.style.border = '1px solid green';
-        info.el.querySelector('.fc-event-title').innerText  = "Available";
-        if (info.event.extendedProps.status === 'full') {
-          info.el.style.backgroundColor = 'red';
-          info.el.style.border = '1px solid red';
-          info.el.querySelector('.fc-event-title').innerText  = "Full";
+        const eventDate = info.event.start; // Get the event date
+        const today = new Date(); // Get today's date
+        today.setHours(0, 0, 0, 0); // Set time to midnight for comparison
+        const yesterday = new Date(today);
+        yesterday.setDate(today.getDate() - 1); // Get yesterday's date
+
+        // Check if the event date is in the past or is yesterday
+        if (eventDate < today) {
+          info.el.style.backgroundColor = 'gray'; // Style for unavailable dates
+          info.el.style.border = '1px solid gray';
+          info.el.querySelector('.fc-event-title').innerText  = "Unavailable";
           info.el.style.cursor = 'not-allowed';
-        } 
-  
-        
+        } else {
+          // Style for available dates (today and onwards)
+          info.el.style.backgroundColor = 'green';
+          info.el.style.border = '1px solid green';
+          info.el.querySelector('.fc-event-title').innerText  = "Available";
+          
+          // Check if the event is marked as full
+          if (info.event.extendedProps && info.event.extendedProps.status === 'full') {
+            info.el.style.backgroundColor = 'red';
+            info.el.style.border = '1px solid red';
+            info.el.query.querySelector('.fc-event-title').innerText  = "Full";
+            info.el.style.cursor = 'not-allowed';
+          }
+        }
       },
       dateClick: function (info) {
         document.getElementById('selectedDate').value = info.dateStr;
@@ -93,46 +120,39 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 
+// New functions added here
 function handleDateClick(date) {
   const selectedDate = date;
-  const selectedTime = document.getElementsByClassName('.timeSlot'); // Get selected time
   const salonID = document.getElementById('salon_select');
 
-  //build url string
-  const url = new URL('ajax/daySchedule.php', window.location.origin); 
+  // Build URL string
+  const url = new URL('capstone-git/ajax/daySchedule.php', window.location.origin);
   url.searchParams.append('date', selectedDate);
   url.searchParams.append('salon_id', salonID.value);
-  
-  // run daySchedule query
+
+  // Run daySchedule query
   fetch(url)
-  .then(response => {
-    return response.json();
-  })
-  .then(data => {
-      disableRadioTime(data);
-  })
-  .catch(error => {
-    console.error('Fetch error:', error);
-  });
-
-
+    .then(response => response.json())
+    .then(data => {
+      disableRadioTime(data); // Disable the time slots based on the booked times
+    })
+    .catch(error => {
+      console.error('Fetch error:', error);
+    });
 }
 
-
 function disableRadioTime(data) {
-  const radios = document.getElementsByName('timeSlot');
-  const arrayData = data[0] != null ? data[0].split(",") : [];
+  const radios = document.getElementsByName('timeSlot'); // Assuming your radio buttons have this name
+  const bookedTimes = data.length > 0 ? data : []; // Get booked times from the response
 
   radios.forEach(radio => {
-      // Check if the radio's value is selected date in database
-      label = radio.parentElement;
-      if (arrayData.includes(radio.value)) {
-          radio.disabled = true; // Disable the radio input
-          label.classList.add("timeSlot-occupied");
-      } else {
-          radio.disabled = false;
-          label.classList.remove("timeSlot-occupied");
-      }
-     
+    const label = radio.parentElement; // Get the label for the radio button
+    if (bookedTimes.includes(radio.value)) {
+      radio.disabled = true; // Disable the radio input
+      label.classList.add("timeSlot-occupied"); // Add a class to style the occupied time slots
+    } else {
+      radio.disabled = false; // Enable the radio input
+      label.classList.remove("timeSlot-occupied"); // Remove the occupied class
+    }
   });
 }

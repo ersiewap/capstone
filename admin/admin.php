@@ -91,7 +91,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
         <div class="first">
             <div class="appointments">
                 <div class="active_appts">Active Appointments</div>
-                <div class="number_appts">1</div>
+                <div class="number_appts" id="active-appointment-count">0</div> 
             </div>
             <div class="patients">
                 <div class="active_pnts">Active Patients</div>
@@ -109,13 +109,12 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
                         <th>Appointment ID</th>
                         <th>Pet Name</th>
                         <th>Owner Name</th>
-                        <th>Salon</th>
                         <th>Services</th>
                         <th>Date</th>
                         <th>Time</th>
                         <th>Payment Method</th>
                         <th>Total Fees</th>
-                        <th>Appointment Status</th>
+                        <th>Status</th>
                     </tr>
                 </thead>
                 <tbody id="appointments-table-body">
@@ -138,49 +137,108 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
                     <th>Email Address</th>
                     <th>Phone Number</th>
                 </tr>
-                <!-- Patients data will be displayed here -->
+                <tbody id="patients-table-body">
+                    <!-- Patients data will be displayed here -->
+                </tbody>
             </table>
         </div>
     </main>
 
     <script>
-    const appointmentsTableBody = document.getElementById("appointments-table-body");
-    const activeApptsCount = document.querySelector('.number_appts');
-    const activePntsCount = document.querySelector('.number_pnts');
+const appointmentsTableBody = document.getElementById("appointments-table-body");
+const activeApptsCount = document.querySelector('.number_appts');
+const activePntsCount = document.querySelector('.number_pnts');
 
-    // Fetch data for all ongoing appointments and patients from the server
-    Promise.all([
-        fetch('fetch_ongoing_appointments.php').then(response => response.json()),
-        fetch('fetch_active_patients.php').then(response => response.json()) // Assuming you have an endpoint for active patients
-    ])
-    .then(([ongoingAppointments, activePatients]) => {
-        // Update the active appointments count
-        activeApptsCount.textContent = ongoingAppointments.length;
+fetch('fetch_ongoing_appointments.php')
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        // Log the data to check its structure
+        console.log('Fetched Data:', data);
 
-        // Update the active patients count
-        activePntsCount.textContent = activePatients.length;
+        // Clear the existing table body
+        appointmentsTableBody.innerHTML = '';
+
+        // Update the active appointment count display
+        activeApptsCount.textContent = data.ongoing_count; // Set the count directly
 
         // Populate the appointments table
-        let html = '';
-        ongoingAppointments.forEach(appointment => {
-            html += `
-                <tr>
-                    <td>${appointment.appointment_id || appointment.bookID}</td>
+        if (Array.isArray(data.appointments) && data.appointments.length > 0) {
+            data.appointments.forEach(appointment => {
+                const row = document.createElement("tr");
+                
+                // Format the time to HH:MM
+                const formattedTime = new Date(`1970-01-01T${appointment.time}`).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                row.innerHTML = `
+                    <td>${appointment.bookid}</td>
                     <td>${appointment.pet_name}</td>
                     <td>${appointment.owner_name}</td>
-                    <td>${appointment.salon}</td>
-                    <td>${appointment.services}</td>
+                    <td>${appointment.service_names}</td>
                     <td>${appointment.date}</td>
-                    <td>${appointment.time}</td>
-                    <td>${appointment.payment_method}</td>
-                    <td>${appointment.total_fees}</td>
-                    <td>${appointment.appointment_status}</td>
-                </tr>
-            `;
-        });
-        appointmentsTableBody.innerHTML = html;
+                    <td>${formattedTime}</td> <!-- Use formatted time here -->
+                    <td>${appointment.paymentmethod}</td>
+                    <td>${appointment.paymentprice}</td>
+                    <td>
+                        ${
+                            appointment.is_cancelled == 1 
+                            ? 'Cancelled' 
+                            : (appointment.is_cancelled == 0 && appointment.status === "Ongoing" ? 'Ongoing' : 'Completed')
+                        }
+                    </td>
+                `;
+                appointmentsTableBody.appendChild(row);
+            });
+        } else {
+            appointmentsTableBody.innerHTML = '<tr><td colspan="9">No ongoing or completed appointments found.</td></tr>';
+        }
     })
-    .catch(error => console.error('Error:', error));
+    .catch(error => {
+        console.error('There was a problem with the fetch operation:', error);
+    });
+
+    fetch('fetch_active_patients.php')
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        const patientsTableBody = document.getElementById("patients-table-body");
+        patientsTableBody.innerHTML = ''; // Clear existing rows
+
+        // Update the active patient count display
+        const activePntsCount = document.querySelector('.number_pnts');
+        activePntsCount.textContent = data.active_patient_count; // Populate the patients table
+        if (Array.isArray(data.active_patients) && data.active_patients.length > 0) {
+            let html = '';
+            data.active_patients.forEach(patient => {
+                html += `
+                    <tr>
+                        <td>${patient.petid}</td>
+                        <td>${patient.petname}</td>
+                        <td>${patient.owner_name}</td>
+                        <td>${patient.petbirth}</td>
+                        <td>${patient.pet_gender}</td>
+                        <td>${patient.petspecies}</td>
+                        <td>${patient.petbreed}</td>
+                        <td>${patient.owneremail}</td>
+                        <td>${patient.ownernum}</td>
+                    </tr>
+                `;
+            });
+            patientsTableBody.innerHTML = html; // Insert the new rows
+        } else {
+            patientsTableBody.innerHTML = '<tr><td colspan="9">No active patients found.</td></tr>'; // Show message if no data
+        }
+    })
+    .catch(error => console.error('Error fetching patients:', error));
+
 </script>
 </body>
 </html>

@@ -124,7 +124,7 @@
         </div>
 
         <section class="background_book">
-            <div class=" book_word"> BOOK AN <br> APPOINTMENT</div>
+            <div class=" book_word"> BOOK AN <br> APPOINTMENT </div>
             
             <div class=" booking_box" id="booking">
             <form method="POST" action="BookingPage2.php">

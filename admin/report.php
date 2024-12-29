@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="report2.css">
 </head>
 <body>
+    
 <?php
 session_start();
 require_once 'db_connect.php'; // Ensure this file contains the correct database connection
@@ -32,14 +33,31 @@ $salonId = $_SESSION['salonid'] ?? null; // Ensure salonid is stored in the sess
 // Check if both startDate and endDate are provided
 if ($startDate && $endDate && $salonId) {
     // Prepare the SQL query based on the date range and salon ID
-    $sql = "SELECT bookID, ownerID, petid, salonid, serviceid, date, time, paymentmethod, is_cancelled, cancel_date, status, paymentprice 
-            FROM book 
-            WHERE date BETWEEN ? AND ? AND salonid = ?";
+    $sql = "SELECT 
+                b.bookID, 
+                CONCAT(r.ownerfname, ' ', r.ownerlname) AS ownerName, 
+                p.petname AS petName, 
+                b.salonid, 
+                GROUP_CONCAT(s.servicename SEPARATOR ', ') AS serviceNames, b.date, 
+                b.time, 
+                b.paymentmethod, 
+                b.is_cancelled, 
+                b.cancel_date, 
+                b.status, 
+                b.paymentprice 
+            FROM book b
+            JOIN registration_info r ON b.ownerID = r.ownerID
+            JOIN petinfo p ON b.petid = p.petid
+            JOIN services s ON FIND_IN_SET(s.serviceid, b.serviceid) > 0
+            WHERE b.date >= ? AND b.date <= ? AND b.salonid = ?
+            GROUP BY b.bookID, r.ownerfname, r.ownerlname, p.petname, b.salonid, b.date, b.time, b.paymentmethod, b.is_cancelled, b.cancel_date, b.status, b.paymentprice
+            ORDER BY b.date DESC, b.time DESC"; // Order by date and time in descending order
 
     $stmt = $conn->prepare($sql);
     if (!$stmt) {
         http_response_code(500); // Internal server error
         echo json_encode(["error" => "Failed to prepare SQL statement."]);
+        error_log("SQL Error: " . mysqli_error($conn)); // Log the error
         exit;
     }
 
@@ -47,10 +65,34 @@ if ($startDate && $endDate && $salonId) {
     $stmt->execute();
     $result = $stmt->get_result();
 
+    // Debugging output
+    error_log("SQL Query: " . $sql);
+    error_log("Start Date: " . $startDate);
+    error_log("End Date: " . $endDate);
+    error_log("Salon ID: " . $salonId);
+
     // Fetch data from the result set
     while ($row = $result->fetch_assoc()) {
+        // Log the raw data fetched
+        error_log("Fetched Row: " . json_encode($row));
+
+        // Determine the status based on the is_cancelled and status fields
+        if ($row['is_cancelled'] == 1) {
+            $row['status'] = 'Cancelled';
+        } elseif ($row['is_cancelled'] == 0 && $row['status'] == 0) {
+            $row['status'] = 'Ongoing'; // Correctly identify ongoing bookings
+        } elseif ($row['is_cancelled'] == 0 && $row['status'] == 1) {
+            $row['status'] = 'Completed'; // Correctly identify completed bookings
+        }
+
+        // Format the time to show only HH:MM
+        $row['time'] = date("H:i", strtotime($row['time']));
+
         $reports[] = $row;
     }
+
+    // Log the number of reports fetched
+    error_log("Number of Reports: " . count($reports));
 
     // Close the statement
     $stmt->close();
@@ -82,12 +124,14 @@ $conn->close();
               <li class="nav-link"><a href="services.php">Services</a></li>
             </ul>
             <ul class="menu-sign">
-              <li class="nav-link profile">
+            <li class="nav-link profile">
                 <a href="#">
-                  <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0  256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512H418.3c16.4 0  29.7-13.3 29.7-29.7c0-98.5-79.8-178.3-178.3-178.3H178.3z"/></svg>
-                  <span class="text">Admin</span>
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+                        <path d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512H418.3c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304H178.3z"/>
+                    </svg>
+                    <span class="text">Admin</span>
                 </a>
-              </li>
+            </li>
             </ul>
           </div>
         </div>
@@ -101,13 +145,13 @@ $conn->close();
             <input type="date" id="startDate" name="startDate" required>
             <label for="endDate">End Date:</label>
             <input type="date" id="endDate" name="endDate" required>
-            <button type="submit">Generate Report</button>
+            <button type="submit"> Generate Report</button>
         </form>
 
         <?php if (!empty($reports)): ?>
             <!-- Button to download the report as a PDF -->
             <button onclick="downloadPDF()">Download PDF</button>
-        <?php endif; ?>
+        <?php endif?>
     </div>
 
     <?php if (empty($reports)): ?>
@@ -117,10 +161,10 @@ $conn->close();
             <thead>
                 <tr>
                     <th>Book ID</th>
-                    <th>Owner ID</th>
-                    <th>Pet ID</th>
+                    <th>Owner Name</th>
+                    <th>Pet Name</th>
                     <th>Salon ID</th>
-                    <th>Service ID</th>
+                    <th>Service Name</th>
                     <th>Date</th>
                     <th>Time</th>
                     <th>Payment Method</th>
@@ -131,28 +175,23 @@ $conn->close();
                 </tr>
             </thead>
             <tbody>
-              <?php foreach ($reports as $report): ?>
-                  <tr>
-                      <td><?php echo htmlspecialchars($report['bookID'] ?? ''); ?></td>
-                      <td><?php echo htmlspecialchars($report['ownerID'] ?? ''); ?></td>
-                      <td><?php echo htmlspecialchars($report['petid'] ?? ''); ?></td>
-                      <td><?php echo htmlspecialchars($report['salonid'] ?? ''); ?></td>
-                      <td><?php echo htmlspecialchars($report['serviceid'] ?? ''); ?></td>
-                      <td><?php echo htmlspecialchars($report['date'] ?? ''); ?></td>
-                      <td><?php echo htmlspecialchars($report['time'] ?? ''); ?></td>
-                      <td><?php echo htmlspecialchars($report['paymentmethod'] ?? ''); ?></td>
-                      <td><?php echo htmlspecialchars($report['is_cancelled'] ?? ''); ?></td>
-                      <td><?php echo htmlspecialchars($report['cancel_date'] ?? ''); ?></td>
-                      <td>
-                          <?php 
-                          // Check the status and display "Ongoing" if it's 0, otherwise display the actual status
-                          echo htmlspecialchars($report['status'] == 0 ? 'Ongoing' : $report['status']); 
-                          ?>
-                      </td>
-                      <td><?php echo htmlspecialchars($report['paymentprice'] ?? ''); ?></td>
-                  </tr>
-              <?php endforeach; ?>
-              </tbody>
+            <?php foreach ($reports as $report): ?>
+                <tr>
+                    <td><?php echo htmlspecialchars($report['bookID'] ?? ''); ?></td>
+                    <td><?php echo htmlspecialchars($report['ownerName'] ?? ''); ?></td>
+                    <td><?php echo htmlspecialchars($report['petName'] ?? ''); ?></td>
+                    <td><?php echo htmlspecialchars($report['salonid'] ?? ''); ?></td>
+                    <td><?php echo htmlspecialchars($report['serviceNames'] ?? ''); ?></td>
+                    <td><?php echo htmlspecialchars($report['date'] ?? ''); ?></td>
+                    <td><?php echo htmlspecialchars($report['time'] ?? ''); ?></td>
+                    <td><?php echo htmlspecialchars($report['paymentmethod'] ?? ''); ?></td>
+                    <td><?php echo htmlspecialchars($report['is_cancelled'] ?? ''); ?></td>
+                    <td><?php echo htmlspecialchars($report['cancel_date'] ?? ''); ?></td>
+                    <td><?php echo htmlspecialchars($report['status']); ?></td>
+                    <td><?php echo htmlspecialchars($report['paymentprice'] ?? ''); ?></td>
+                </tr>
+            <?php endforeach; ?>
+            </tbody>
         </table>
     <?php endif; ?>
 </main>
@@ -188,7 +227,7 @@ function downloadPDF() {
 
     document.body.appendChild(form);
     form.submit();
-    document.body.removeChild(form); // Clean up
+    document.body.removeChild(form);
 }
 </script>
 </body>
