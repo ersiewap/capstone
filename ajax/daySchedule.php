@@ -19,7 +19,7 @@ if ($conn->connect_error) {
 }
 
 // Query to get booked times for the selected date
-$sql = "SELECT GROUP_CONCAT(DATE_FORMAT(book.time, '%H:%i')) AS time FROM `book` WHERE book.date = ? AND salonid = ?";
+$sql = "SELECT GROUP_CONCAT(DATE_FORMAT(book.time, '%H:%i')) AS time FROM `book` WHERE book.date = ? AND salonid = ? and is_cancelled = 0 GROUP BY book.date";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("si", $startDate, $salon_id); // Bind parameters
 $stmt->execute();

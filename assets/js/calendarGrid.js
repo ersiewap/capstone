@@ -126,7 +126,7 @@ document.addEventListener('DOMContentLoaded', function() {
 function handleDateClick(date) {
   const selectedDate = date;
   const salonID = document.getElementById('salon_select');
-
+  
   // Build URL string
   const url = new URL('capstone-git/ajax/daySchedule.php', window.location.origin);
   url.searchParams.append('date', selectedDate);
@@ -136,20 +136,24 @@ function handleDateClick(date) {
   fetch(url)
     .then(response => response.json())
     .then(data => {
-      disableRadioTime(data); // Disable the time slots based on the booked times
+      disableRadioTime(data,selectedDate); // Disable the time slots based on the booked times
     })
     .catch(error => {
       console.error('Fetch error:', error);
     });
 }
 
-function disableRadioTime(data) {
+function disableRadioTime(data,date) {
   const radios = document.getElementsByName('timeSlot'); // Assuming your radio buttons have this name
   const bookedTimes = data.length > 0 ? data : []; // Get booked times from the response
+  const today = new Date();
+  const currentTime = today.getHours();
 
   radios.forEach(radio => {
     const label = radio.parentElement; // Get the label for the radio button
-    if (bookedTimes.includes(radio.value)) {
+    if (bookedTimes.includes(radio.value) 
+      || (date === today.toISOString().split('T')[0] && currentTime >= radio.value.split(':')[0]) 
+      || date < today.toISOString().split('T')[0]) {
       radio.disabled = true; // Disable the radio input
       label.classList.add("timeSlot-occupied"); // Add a class to style the occupied time slots
     } else {

@@ -16,7 +16,7 @@ $conn = new mysqli($servername, $username, $password, $dbname);
 $schedules = generateDateRange($startDate, $endDate);
 
 // Query to get booked dates
-$sql = "SELECT book.date, COUNT(*) as booking_count FROM book WHERE book.date BETWEEN '$startDate' AND '$endDate' AND salonid = '$salon_id' GROUP BY book.date";
+$sql = "SELECT book.date, COUNT(*) as booking_count FROM book WHERE book.date BETWEEN '$startDate' AND '$endDate' AND salonid = '$salon_id' and book.is_cancelled = 0 GROUP BY book.date";
 $stmt = $conn->prepare($sql);
 $stmt->execute();
 $result = $stmt->get_result();
