@@ -75,6 +75,22 @@ if ($result->num_rows > 0) {
         $petBreed = $row['petbreed'];
         $petPhoto = $row['petphoto'];
 
+// Retrieve appointment history for each pet
+$appointmentsSql = "SELECT b.bookid, b.date, b.paymentmethod, b.paymentprice, b.status, 
+                    GROUP_CONCAT(s.servicename SEPARATOR ', ') AS services 
+                    FROM book b 
+                    JOIN services s ON FIND_IN_SET(s.serviceid, b.serviceid) > 0 
+                    WHERE b.petID = '$petID' 
+                    GROUP BY b.bookid"; // Use FIND_IN_SET to match multiple service IDs
+$appointmentsResult = $conn->query($appointmentsSql);
+$appointments = array();
+
+if ($appointmentsResult->num_rows > 0) {
+    while ($appointmentRow = $appointmentsResult->fetch_assoc()) {
+        $appointments[] = $appointmentRow; // Store each appointment
+    }
+} else {
+}
         $pets[] = array(
             'petID' => $petID,
             'petName' => $petName,
@@ -82,7 +98,8 @@ if ($result->num_rows > 0) {
             'petGender' => $petGender,
             'petSpecies' => $petSpecies,
             'petBreed' => $petBreed,
-            'petPhoto' => $petPhoto
+            'petPhoto' => $petPhoto,
+            'appointments' => $appointments // Include appointments in the pet data
         );
     }
 } else {
@@ -100,7 +117,7 @@ mysqli_close($conn);
 <link rel="stylesheet" href="path/to/font-awesome/css/font-awesome.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="addpetnew.css">
@@ -230,10 +247,8 @@ mysqli_close($conn);
                         </table>
                     </div>
                     </div>
-                
-                
+                </div>
             </div>
-            
         </div>
     </div>
 </main>
@@ -256,7 +271,7 @@ function getPetList() {
     };
 }
 
-    window.onload = getPetList;
+window.onload = getPetList;
 </script>
 
 <script>
@@ -276,21 +291,26 @@ petList.addEventListener('click', function(event) {
 
 // Function to get pet details from the PHP script
 function getPetDetails(petName) {
-  const xhr = new XMLHttpRequest();
-  xhr.open('GET', `getPetDetails.php?petname=${petName}`);
-  xhr.onload = () => {
-    if (xhr.status === 200) {
-      const petDetails = JSON.parse(xhr.responseText);
-      displayPetDetails(petDetails);
-    } else {
-      console.log('Error getting pet details:', xhr.statusText);
-    }
-  };
-  xhr.send();
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', `getPetDetails.php?petname=${petName}`);
+    xhr.onload = () => {
+        if (xhr.status === 200) {
+            try {
+                const petDetails = JSON.parse(xhr.responseText);
+                displayPetDetails(petDetails);
+            } catch (e) {
+                console.error('Error parsing JSON:', e);
+                console.log('Response:', xhr.responseText); // Log the raw response for debugging
+            }
+        } else {
+            console.log('Error getting pet details:', xhr.statusText);
+        }
+    };
+    xhr.send();
 }
 
-// Function to display pet details and appointment history
 function displayPetDetails(petDetails) {
+    console.log(petDetails); // Debug output to check the structure
     const petImage = document.getElementById('petImage');
     const petName = document.getElementById('petName');
     const petBirthday = document.getElementById('petBirthday');
@@ -310,10 +330,9 @@ function displayPetDetails(petDetails) {
     // Clear previous appointment history
     appointmentsTable.innerHTML = `
         <tr>
-            <th>Reference Number </th>
+            <th>Reference Number</th>
             <th>Service</th>
             <th>Date</th>
-            <th>Salon</th>
             <th>Payment Method</th>
             <th>Total Fee</th>
             <th>Appointment Status</th>
@@ -322,50 +341,44 @@ function displayPetDetails(petDetails) {
 
     // Display appointment history
     petDetails.appointments.forEach(appointment => {
+        console.log(appointment); // Debug output for each appointment
         const row = appointmentsTable.insertRow();
         row.innerHTML = `
             <td>${appointment.bookid}</td>
-            <td>${appointment.servicename}</td>
+            <td>${appointment.services || 'No services available'}</td> <!-- Display all services -->
             <td>${appointment.date}</td>
-            <td>${appointment.salon_name || 'N/A'}</td> <!-- Display salon name -->
             <td>${appointment.paymentmethod}</td>
             <td>${appointment.paymentprice}</td>
-            <td>${appointment.appointment_status}</td> <!-- Display appointment status -->
+            <td>${appointment.appointment_status}</td>
         `;
     });
 }
 </script>
 
-
 <!-- Script for Add pet form -->
 <script>
     // For Photo Upload
-  document.getElementById('uploadButton').addEventListener('click', function() {
-            document.getElementById('fileInput').click();
-        });
+    document.getElementById('uploadButton').addEventListener('click', function() {
+        document.getElementById('fileInput').click();
+    });
 
-        document.getElementById('fileInput').addEventListener('change', function(event) {
-            const file = event.target.files[0];
-            if (file) {
-                console.log('Selected file:', file.name);
-                // You can add your own logic to handle the selected file here
-            }
-        });
+    document.getElementById('fileInput').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            console.log('Selected file:', file.name);
+        }
+    });
 
     // Show the form when the "Add Pet" button is clicked
     document.getElementById('addPetButton').addEventListener('click', function() {
-        // Toggle visibility of the form
-        
         const petForm = document.getElementById('petDetailsForm');
         petForm.style.display = petForm.style.display === 'block' ? 'none' : 'block';
         const petList = document.getElementById('petList');
         petList.style.display = petList.style.display === 'none' ? 'block' : 'none';
-
     });
-   
 
-        // Handle form submission
-        document.getElementById('petForm').addEventListener('submit', function(event) {
+    // Handle form submission
+    document.getElementById('petForm').addEventListener('submit', function(event) {
         event.preventDefault(); // Prevent form from submitting the default way
 
         // Get form data
@@ -392,22 +405,20 @@ function displayPetDetails(petDetails) {
 
         // Handle the response from the PHP script
         xhr.onload = () => {
-        if (xhr.status === 200) {
-            console.log('Pet added successfully!');
-            // Display a success message
-            const successMessage = document.getElementById('successMessage');
-            successMessage.textContent = 'Pet added successfully!';
-            successMessage.style.display = 'block';
+            if (xhr.status === 200) {
+                console.log('Pet added successfully!');
+                const successMessage = document.getElementById('successMessage');
+                successMessage.textContent = 'Pet added successfully!';
+                successMessage.style.display = 'block';
 
-            // Refresh the pet list
-            getPetList();
-        } else {
-            console.log('Error adding pet:', xhr.statusText);
-        }
+                // Refresh the pet list
+                getPetList();
+            } else {
+                console.log('Error adding pet:', xhr.statusText);
+            }
         };
-        });
+    });
 </script>
 
-
 </body>
-</html> 
+</html>

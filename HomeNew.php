@@ -36,11 +36,11 @@ if ($conn->connect_error) {
 $ownerID = $_SESSION['ownerID'];
 
 // Prepare the SQL query to get all ongoing bookings
-$sql = "SELECT b.bookid, p.petname, b.serviceid, s.shopname, b.date
+$sql = "SELECT b.bookid, p.petname, b.serviceid, s.shopname, b.date, b.time
         FROM book b
         JOIN petinfo p ON b.petid = p.petid
         JOIN salon s ON b.salonid = s.salonid
-        WHERE b.ownerID = ? AND b.status = 0 AND b.is_cancelled = 0"; // Assuming status = 0 means ongoing and is_cancelled = 0 means not cancelled
+        WHERE b.ownerID = ? AND b.status = 0 AND b.is_cancelled = 0";
 
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $ownerID);
@@ -137,6 +137,7 @@ $conn->close();
                 <p>Salon: <?php echo htmlspecialchars($booking['shopname']); ?></p>
                 <p>Service: <?php echo htmlspecialchars(implode(', ', $serviceNames[$booking['bookid']])); ?></p>
                 <p>Booking Date: <?php echo htmlspecialchars($booking['date']); ?></p> <!-- Displaying the booking date -->
+                <p>Appointment Time: <?php echo date('h:i A', strtotime($booking['time'])); ?></p> <!-- Displaying the formatted appointment time -->
             </div>
             <hr>
         <?php endforeach; ?>

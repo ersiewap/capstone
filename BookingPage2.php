@@ -7,10 +7,6 @@
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="BookingPage2.css">
-    
-    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <?php
 
@@ -44,10 +40,10 @@ if ($conn->connect_error) {
 }
 
 // Get values from POST parameters
-$selectedPet = $_POST['pet_id'] ?? ''; // Ensure this is correctly set in your form
-$selectedSalon = $_POST['salon_id'] ?? ''; // Ensure this is correctly set in your form
+$selectedPet = $_POST['pet_id'] ?? '';
+$selectedSalon = $_POST['salon_id'] ?? '';
 $selectedDate = $_POST['selected_date'] ?? '';
-$selectedTime = $_POST['timeSlot'] ?? ''; // Retrieve the selected time
+$selectedTime = $_POST['timeSlot'] ?? '';
 $selectedPayment = $_POST['payment_method'] ?? '';
 $userservices = isset($_POST['serviceid']) ? $_POST['serviceid'] : [];
 
@@ -56,25 +52,6 @@ if (empty($selectedPet) || empty($selectedSalon) || empty($selectedDate) || empt
     echo "<script>alert('Please complete the booking by selecting all required information.'); window.location.href='BookingPage1.php';</script>";
     exit; // Stop further execution
 }
-
-// Initialize total amount
-$totalAmount = 0;
-
-// Check for duplicate bookings
-$checkDuplicateSql = "SELECT * FROM book WHERE date = ? AND time = ? AND salonid = ?";
-$checkStmt = $conn->prepare($checkDuplicateSql);
-$checkStmt->bind_param("ssi", $selectedDate, $selectedTime, $selectedSalon);
-$checkStmt->execute();
-$duplicateResult = $checkStmt->get_result();
-
-if ($duplicateResult->num_rows > 0) {
-    echo "<script>alert('Duplicate entry: There is already a booking for this date and time.'); window.location.href='BookingPage1.php';</script>";
-    $checkStmt->close();
-    $conn->close();
-    exit; // Stop further execution
-}
-
-$checkStmt->close();
 
 // Fetch pet name
 $stmt = $conn->prepare("SELECT petname FROM petinfo WHERE petid = ?");
@@ -85,62 +62,80 @@ $row = $result->fetch_assoc();
 $petname = $row['petname'] ?? 'Unknown Pet';
 $stmt->close();
 
-// Initialize salon name
-$salonName = '';
+// Fetch salon name
+$stmt = $conn->prepare("SELECT shopname FROM salon WHERE salonid = ?");
+$stmt->bind_param("i", $selectedSalon);
+$stmt->execute();
+$result = $stmt->get_result();
+$row = $result->fetch_assoc();
+$salonName = $row['shopname'] ?? 'Unknown Salon';
+$stmt->close();
 
-// Define the $salons array
-$salons = array(
-    array('salonid' => 1, 'shopname' => 'Vetter Health Animal Clinic and Livestock Consultancy'),
-    array('salonid' => 2, 'shopname' => 'Davids Pet Grooming Salon'),
-    array('salonid' => 3, 'shopname' => 'Kanjis Pet Grooming Services'),
-);
-
-// Find the selected salon name
-foreach ($salons as $salon) {
-    if ($salon['salonid'] == $selectedSalon) { // Corrected line
-        $salonName = $salon['shopname'];
-        break;
-    }
-}
-
-// Initialize service names
+// Calculate total amount for services
+$totalAmount = 0;
 $serviceNames = [];
-
-// Calculate total amount and prepare service IDs
-$serviceIds = [];
 if (!empty($userservices) && is_array($userservices)) {
-    $serviceIds = array_map('intval', $userservices); // Ensure service IDs are integers
-    $serviceIdsString = implode(',', $serviceIds); // Create a comma-separated string of service IDs
-} else {
-    $serviceIdsString = NULL; // Set to NULL if no services are selected
-}
-
-// Fetch prices and names for the selected services
-if ($serviceIdsString) {
+    $serviceIdsString = implode(',', array_map('intval', $userservices));
     $sql = "SELECT servicename, price FROM services WHERE serviceid IN ($serviceIdsString)";
     $result = $conn->query($sql);
-
     if ($result->num_rows > 0) {
         while ($row = $result->fetch_assoc()) {
-            $serviceNames[] = htmlspecialchars($row['servicename']); // Collect service names
-            $totalAmount += (float)$row['price']; // Add to total amount
+            $serviceNames[] = htmlspecialchars($row['servicename']);
+            $totalAmount += (float)$row['price'];
         }
     }
 }
-
-// Convert service names array to a string for display
 $serviceNamesString = implode(', ', $serviceNames);
 
-// Insert data into the book table, including the status column
-$status = 0; // Set status to 0 for new bookings
-$stmt = $conn->prepare("INSERT INTO book (ownerID, petid, salonid, date, time, paymentmethod, serviceid, paymentprice, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-$stmt->bind_param("iiisssssd", $userId, $selectedPet, $selectedSalon, $selectedDate, $selectedTime, $selectedPayment, $serviceIdsString, $totalAmount, $status);
+// Display booking summary
+?>
+<body>
+    <div class="summary">
+        <h2>Booking Summary</h2>
+        <p>Service: <?php echo $serviceNamesString; ?></p>
+        <p>Date: <?php echo htmlspecialchars($selectedDate); ?></p>
+        <p>Time: <?php echo htmlspecialchars($selectedTime); ?></p>
+        <p>Pet: <?php echo htmlspecialchars($petname); ?></p>
+        <p>Pet Salon: <?php echo htmlspecialchars($salonName); ?></p>
+ <p>Payment Method: <?php echo htmlspecialchars($selectedPayment); ?></p>
+        <p>Total Fee: <?php echo number_format($totalAmount, 2); ?></p>
 
-if ($stmt->execute()) { // Execute the insert statement
-    // Booking was successful, now prepare to send the email
-    $stmt->close();
-    $conn->close();
+        <button id="confirmBooking">Confirm Booking</button>
+    </div>
 
+    <script>
+        document.getElementById('confirmBooking').addEventListener('click', function() {
+            // Create a form to submit the booking details
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = ''; // Submit to the same page
+
+            // Add hidden inputs for the booking details
+            const inputs = [
+                { name: 'pet_id', value: '<?php echo $selectedPet; ?>' },
+                { name: 'salon_id', value: '<?php echo $selectedSalon; ?>' },
+                { name: 'selected_date', value: '<?php echo $selectedDate; ?>' },
+                { name: 'timeSlot', value: '<?php echo $selectedTime; ?>' },
+                { name: 'payment_method', value: '<?php echo $selectedPayment; ?>' },
+                { name: 'serviceid[]', value: '<?php echo implode(',', $userservices); ?>' },
+                { name: 'confirm_booking', value: '1' } // Hidden input to indicate confirmation
+            ];
+
+            inputs.forEach(input => {
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = input.name;
+                hiddenInput.value = input.value;
+                form.appendChild(hiddenInput);
+            });
+
+            document.body.appendChild(form);
+            form.submit(); // Submit the form
+        });
+    </script>
+
+<?php
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_booking'])) {
     // Prepare email details
     $email = $userEmail; // Use the logged-in user's email
     $subject = "Booking Confirmation";
@@ -154,148 +149,51 @@ if ($stmt->execute()) { // Execute the insert statement
         Total Fee: " . number_format($totalAmount, 2) . "
     ";
 
-    // Store email details in session to send after confirmation
-    $_SESSION['emailDetails'] = [
-        'email' => $email,
-        'subject' => $subject,
-        'message' => $message
-    ];
+    // Send email using PHPMailer
+    $mail = new PHPMailer(true);
+    try {
+        $mail->isSMTP();
+        $mail->Host = 'smtp.gmail.com';
+        $mail->SMTPAuth = true;
+        $mail->Username = 'alyssasamson0105@gmail.com';  // Your Gmail username
+        $mail->Password = 'cpuuhsbjwnpfznzp';  // Your Gmail app password or regular password
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // Use STARTTLS
+        $mail->Port = 587; // Use port 587 for STARTTLS
 
-    // Redirect to a confirmation page or show a confirmation message
-    header('Location: confirmation.php'); // Redirect to a confirmation page
-    exit;
-} else {
-    echo "Error: Could not execute the booking.";
-    $stmt->close();
-    $conn->close();
+        // Recipients
+        $mail->setFrom('alyssasamson0105@gmail.com', 'Booking System');
+        $mail->addAddress($email);
+
+        // Content
+        $mail->isHTML(true);
+        $mail->Subject = $subject;
+        $mail->Body = nl2br($message); // Convert newlines to <br> tags for HTML email
+
+        // Send email
+        if ($mail->send()) {
+            echo "<script>alert('Booking confirmed! An email has been sent to you.');</script>";
+
+            // Insert booking details into the database
+            $stmt = $conn->prepare("INSERT INTO book (ownerID, petid, salonid, serviceid, date, time, paymentmethod, paymentprice, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $ownerID = $userId; // Assuming you have the ownerID from the session
+            $serviceIDs = implode(',', $userservices); // Convert service IDs array to a comma-separated string
+            $status = 0; // Set status to 0 for ongoing
+
+            // Update the bind_param to include 'd' for the paymentprice and 'i' for the status
+            $stmt->bind_param("iiissssdi", $ownerID, $selectedPet, $selectedSalon, $serviceIDs, $selectedDate, $selectedTime, $selectedPayment, $totalAmount, $status);
+
+            if ($stmt->execute()) {
+            } else {
+                echo "<script>alert('Error saving booking details: " . $stmt->error . "');</script>";
+            }
+            $stmt->close();
+        } else {
+            echo "<script>alert('Message could not be sent. Mailer Error: {$mail->ErrorInfo}');</script>";
+        }
+    } catch (Exception $e) {
+        echo "<script>alert('Message could not be sent. Mailer Error: {$mail->ErrorInfo}');</script>";
+    }
 }
 ?>
-
-<body>
-    <form id="bookingForm" action="" method="post">
-        <input type="hidden" name="email" value="<?php echo $userEmail; ?>">
-        <input type="hidden" name="subject" value="Booking Confirmation">
-        <input type="hidden" name="message" value="
-            Service: <?php echo $serviceNamesString; ?>,
-            Date: <?php echo htmlspecialchars($selectedDate); ?>,
-            Time: <?php echo htmlspecialchars($selectedTime); ?>,
-            Pet: <?php echo htmlspecialchars($petname); ?>,
-            Pet Salon: <?php echo htmlspecialchars($salonName); ?>,
-            Payment Method: <?php echo htmlspecialchars($selectedPayment); ?>,
-            Total Fee: <?php echo number_format($totalAmount, 2); ?>
-        ">
-        <div class="nav">
-            <div>
-                <a href="BookingPage1.php"><i class="fa-solid fa-arrow-left arrow_left"></i></a>
-                Booking Summary
-            </div>
-        </div>
-        <!-- content -->
-        <div class="box">
-            <div class="contents">Service</div>
-            <div class="services1">
-                <div class="contents1_service"><?php echo $serviceNamesString; ?></div>
-            </div>
-            
-            <hr class="line1">
-            <div class="container_date_time">
-                <div class="date_div">
-                    <div class="contents">Date</div>
-                    <div class="contents1_date"><?php echo htmlspecialchars($selectedDate); ?></div>
-                </div>
-                <div class="time_div">
-                    <div class="contents">Time</div>
-                    <div class="contents1_time"><?php echo htmlspecialchars($selectedTime); ?></div>
-                </div>
-            </div>
-            
-            <hr class="line1">
-            
-            <div class="contents">Pet</div>
-            <div class="contents1_pet"><?php echo htmlspecialchars($petname); ?></div>
-            <hr class="line1">
-            <div class="contents">Pet Salon</div>
-            <div class="contents1_salon"><?php echo htmlspecialchars($salonName); ?></div>
-            <hr class="line1">
-            <div class="contents">Payment Method</div>
-            <div class="contents1_payment"><?php echo htmlspecialchars($selectedPayment); ?></div>
-            
-            <hr class="line1">
-            <div class="contents">Total Fee</div>
-            <div class="contents1_fee"><?php echo number_format($totalAmount, 2); ?></div>
-
-        </div>
-
-        <a class="cd-popup-trigger book_button">Book</a>
-        <div class="cd-popup" role="alert">
-            <div class="cd-popup-container">
-                <i id="initial-icon" class="fa-solid fa-calendar-check"></i>
-                <p class="popup-text">Are you sure you want to book an appointment?</p>
-                <div id="confirmation-section" style="display: none;">
-                    <i class="fa-solid fa-circle-check"></i>
-                    <p class="confirmation-text">Booking Successful!</p>
-                </div>
-                <ul class="cd-buttons">
-                    <li><button type="submit" name="send" class="yes-button" onclick="confirmBooking()">Book</button></li>
-                    <li><a href="#0" class="no-button">Cancel</a></li>
-                </ul>
-                <a href="#0" class="cd-popup-close img-replace">Close</a>
-            </div> <!-- cd-popup-container -->
-        </div> <!-- cd-popup -->
-    </form>
-    
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
-<script>
-    jQuery(document).ready(function($){
-        //open popup
-        $('.cd-popup-trigger').on('click', function(event){
-            event.preventDefault();
-            $('.cd-popup ').addClass('is-visible');
-        });
-        
-        //close popup
-        $('.cd-popup').on('click', function(event){
-            if( $(event.target).is('.cd-popup-close') || $(event.target).is('.cd-popup') ) {
-                event.preventDefault();
-                $(this).removeClass('is-visible');
-            }
-        });
-        
-        //close popup when clicking the esc keyboard button
-        $(document).keyup(function(event){
-            if(event.which=='27'){
-                $('.cd-popup').removeClass('is-visible');
-            }
-        });
-
-        // show confirmation message when "Yes" button is clicked
-        $('.yes-button').on('click', function(event){
-            event.preventDefault();
-            $('.popup-text').hide();
-            $('.confirmation-text').show();
-            $('.cd-buttons').hide();
-            confirmBooking();
-        });
-        
-        $('.no-button').on('click', function(event){
-            event.preventDefault();
-            $('.cd-popup').removeClass('is-visible');
-        });
-    });
-
-    function confirmBooking() {
-        // Hide the initial booking text and icon
-        document.querySelector('.popup-text').style.display = 'none';
-        document.getElementById('initial-icon').style.display = 'none';
-        // Show the confirmation section
-        document.getElementById('confirmation-section').style.display = 'block';
-
-        // Submit the form after a short delay to show the confirmation message
-        setTimeout(function() {
-            document.getElementById('bookingForm').submit();
-        }, 2000); // Adjust the delay as needed
-    }
-</script>
-
 </body>
 </html>
